@@ -1,0 +1,29 @@
+# Build artifacts
+/bin/
+/dist/
+# The built binary at the repo root, not the cmd/wifitest/ source directory.
+/wifitest
+/wifitest.exe
+
+# Local configuration and history — may contain credentials (webhook URLs).
+# Never commit these.
+config.json
+config.toml
+*.local.json
+*.local.toml
+history.jsonl
+
+# Go
+*.test
+*.out
+vendor/
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Tooling artefacts that are not project content
+.semgrep/
