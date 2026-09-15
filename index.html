@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WiFi Speed Test — preview</title>
+    <meta
+      name="description"
+      content="A cross-platform network diagnostic tool that reports which segment of the path is at fault. This site is a non-functional preview."
+    />
+    <link rel="icon" href="assets/img/icon.png" />
+    <link rel="stylesheet" href="assets/css/tokens.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/index.css" />
+  </head>
+
+  <body>
+    <div class="page">
+      <header class="topbar">
+        <span class="topbar__brand">
+          <img src="assets/img/icon.png" alt="" width="28" height="28" />
+          WiFi Speed Test
+        </span>
+
+        <span class="topbar__right">
+          <nav class="shell-nav" aria-label="Shells">
+            <a href="index.html" aria-current="page">Home</a>
+            <a href="terminal.html">Terminal</a>
+            <a href="mobile.html">Android</a>
+          </nav>
+
+          <span class="lang-toggle" role="group" data-i18n-label="langLabel">
+            <button type="button" data-lang="en" aria-pressed="true">EN</button>
+            <button type="button" data-lang="zh-TW" aria-pressed="false">中文</button>
+          </span>
+        </span>
+      </header>
+
+      <section class="hero">
+        <img class="hero__icon" src="assets/img/icon.png" alt="" width="96" height="96" />
+        <h1 class="hero__title">WiFi Speed Test</h1>
+        <p class="hero__tagline" data-i18n="tagline"></p>
+
+        <div class="hero__actions">
+          <a class="button" href="terminal.html" data-i18n="exploreTerminal">Command line</a>
+          <a class="button button--quiet" href="mobile.html" data-i18n="exploreMobile">Android app</a>
+        </div>
+
+        <p class="sim-banner" style="text-align: left">
+          <span class="sim-banner__mark" aria-hidden="true">!</span>
+          <span data-i18n="previewFooter"></span>
+        </p>
+      </section>
+
+      <section class="section">
+        <h2 class="section__title" data-i18n="whatItMeasures">What it measures</h2>
+
+        <div class="grid-3">
+          <article class="card feature feature--latency">
+            <h3 class="feature__title">
+              <span class="feature__bar" aria-hidden="true"></span>
+              <span data-i18n="coreLatency">Latency, jitter and loss</span>
+            </h3>
+            <p class="feature__body" data-i18n="coreLatencyBody"></p>
+          </article>
+
+          <article class="card feature feature--download">
+            <h3 class="feature__title">
+              <span class="feature__bar" aria-hidden="true"></span>
+              <span data-i18n="coreDownload">Download</span>
+            </h3>
+            <p class="feature__body" data-i18n="coreDownloadBody"></p>
+          </article>
+
+          <article class="card feature feature--upload">
+            <h3 class="feature__title">
+              <span class="feature__bar" aria-hidden="true"></span>
+              <span data-i18n="coreUpload">Upload</span>
+            </h3>
+            <p class="feature__body" data-i18n="coreUploadBody"></p>
+          </article>
+        </div>
+      </section>
+
+      <!-- The differentiator gets a section of its own. A visitor who skims
+           everything else should still land on this one. -->
+      <section class="section">
+        <h2 class="section__title" data-i18n="differenceTitle">The part a speed test cannot do</h2>
+
+        <div class="difference">
+          <p class="section__lead" data-i18n="differenceBody"></p>
+
+          <div class="card">
+            <div class="path">
+              <div class="path__step">
+                <span class="path__rail" aria-hidden="true">
+                  <span class="path__dot"></span>
+                  <span class="path__line"></span>
+                </span>
+                <span>
+                  <span class="path__name" data-i18n="layerGateway">Local gateway</span>
+                  <span class="path__meaning" style="display: block" data-i18n="diffGateway"></span>
+                </span>
+              </div>
+
+              <div class="path__step">
+                <span class="path__rail" aria-hidden="true">
+                  <span class="path__dot"></span>
+                  <span class="path__line"></span>
+                </span>
+                <span>
+                  <span class="path__name" data-i18n="layerRegional">Regional egress</span>
+                  <span class="path__meaning" style="display: block" data-i18n="diffRegional"></span>
+                </span>
+              </div>
+
+              <div class="path__step">
+                <span class="path__rail" aria-hidden="true">
+                  <span class="path__dot"></span>
+                  <span class="path__line"></span>
+                </span>
+                <span>
+                  <span class="path__name" data-i18n="layerInternational">International</span>
+                  <span
+                    class="path__meaning"
+                    style="display: block"
+                    data-i18n="diffInternational"
+                  ></span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section__title" data-i18n="shellsTitle">Three shells, one engine</h2>
+        <p class="section__lead" data-i18n="shellsBody"></p>
+
+        <div class="explore">
+          <a class="explore__card" href="terminal.html">
+            <span class="explore__name" data-i18n="exploreTerminal">Command line</span>
+            <span class="explore__body" data-i18n="exploreTerminalBody"></span>
+          </a>
+
+          <a class="explore__card" href="mobile.html">
+            <span class="explore__name" data-i18n="exploreMobile">Android app</span>
+            <span class="explore__body" data-i18n="exploreMobileBody"></span>
+          </a>
+
+          <!-- Marked unavailable rather than hidden: the roadmap is part of
+               what a visitor came to learn. -->
+          <span class="explore__card" aria-disabled="true">
+            <span class="explore__name" data-i18n="exploreDesktop">Desktop app</span>
+            <span class="explore__body" data-i18n="exploreDesktopBody"></span>
+          </span>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section__title" data-i18n="platformsTitle">Platforms</h2>
+
+        <div class="matrix-wrap">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th scope="col">Platform</th>
+                <th scope="col" data-i18n="platformCli">Command line</th>
+                <th scope="col" data-i18n="platformDesktop">Desktop</th>
+                <th scope="col" data-i18n="platformApp">Native app</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Windows</td>
+                <td data-i18n="planned">planned</td>
+                <td data-i18n="planned">planned</td>
+                <td data-i18n="notApplicable">not applicable</td>
+              </tr>
+              <tr>
+                <td>Linux</td>
+                <td data-i18n="planned">planned</td>
+                <td data-i18n="planned">planned</td>
+                <td data-i18n="notApplicable">not applicable</td>
+              </tr>
+              <tr>
+                <td>macOS</td>
+                <td data-i18n="planned">planned</td>
+                <td data-i18n="planned">planned</td>
+                <td data-i18n="notApplicable">not applicable</td>
+              </tr>
+              <tr>
+                <td>Android (Termux)</td>
+                <td data-i18n="planned">planned</td>
+                <td data-i18n="notApplicable">not applicable</td>
+                <td data-i18n="notApplicable">not applicable</td>
+              </tr>
+              <tr>
+                <td>Android</td>
+                <td data-i18n="notApplicable">not applicable</td>
+                <td data-i18n="notApplicable">not applicable</td>
+                <td data-i18n="planned">planned</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section__title" data-i18n="principlesTitle">How it behaves</h2>
+
+        <div class="grid-3">
+          <article class="card">
+            <h3 class="feature__title" data-i18n="principleCloud">No cloud services</h3>
+            <p class="feature__body" data-i18n="principleCloudBody"></p>
+          </article>
+
+          <article class="card">
+            <h3 class="feature__title" data-i18n="principleTargets">
+              You choose where your traffic goes
+            </h3>
+            <p class="feature__body" data-i18n="principleTargetsBody"></p>
+          </article>
+
+          <article class="card">
+            <h3 class="feature__title" data-i18n="principleOpen">Open source, MIT</h3>
+            <p class="feature__body" data-i18n="principleOpenBody"></p>
+          </article>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <a href="https://github.com/SpaceSquare640/WiFi_Speed_Test" data-i18n="viewOnGitHub">
+          Source on GitHub
+        </a>
+        <span data-i18n="previewFooter"></span>
+        <span>Copyright (c) 2026 SpaceSquare · MIT</span>
+      </footer>
+    </div>
+
+    <script src="assets/js/i18n.js"></script>
+    <script>
+      // init returns the language actually in force, which may come from a
+      // previous visit. The buttons have to agree with it, or the page reads as
+      // Chinese while the control insists it is English.
+      const active = I18n.init();
+      document.querySelectorAll('.lang-toggle button').forEach((button) => {
+        button.setAttribute('aria-pressed', String(button.dataset.lang === active));
+      });
+
+      document.querySelectorAll('.lang-toggle button').forEach((button) => {
+        button.addEventListener('click', () => {
+          I18n.set(button.dataset.lang);
+          document.querySelectorAll('.lang-toggle button').forEach((other) => {
+            other.setAttribute('aria-pressed', String(other === button));
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

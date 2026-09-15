@@ -1,0 +1,298 @@
+/* Components shared across the preview pages. */
+
+/* ---------- Simulation banner ---------- */
+
+/*
+ * The page must never be mistaken for a working speed test. The banner sits
+ * above the content rather than below it, states the fact in plain words, and
+ * is not dismissible.
+ */
+.sim-banner {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  background: var(--banner-bg);
+  color: var(--banner-fg);
+  border-left: 3px solid var(--banner-accent);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.sim-banner__mark {
+  color: var(--banner-accent);
+  font-weight: var(--weight-bold);
+  flex: none;
+}
+
+/* ---------- Card ---------- */
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-pad);
+}
+
+.card__title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--fg-secondary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+/* ---------- Primary action ---------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: var(--button-bg);
+  color: var(--button-fg);
+  font-weight: var(--weight-bold);
+  border-radius: var(--radius-full);
+  padding: var(--space-3) var(--space-6);
+  /* The class is used on both <button> and <a>; the link defaults would
+     otherwise underline it and repaint it in the link colour. */
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--button-bg-hover);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.button:disabled {
+  background: var(--button-bg-disabled);
+  color: var(--button-fg-disabled);
+  cursor: not-allowed;
+}
+
+/* ---------- Metric chips ---------- */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.metric {
+  background: var(--bg-raised);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-2);
+  text-align: center;
+}
+
+.metric__label {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.metric__value {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  margin-top: var(--space-1);
+}
+
+.metric__unit {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  margin-left: 2px;
+}
+
+.metric--download .metric__value {
+  color: var(--accent-download);
+}
+
+.metric--upload .metric__value {
+  color: var(--accent-upload);
+}
+
+.metric--latency .metric__value {
+  color: var(--accent-latency);
+}
+
+/* ---------- Layered diagnostics ---------- */
+
+/*
+ * The centrepiece. A plain speed test reports a number; this block is the part
+ * that says which segment is responsible, so it gets the same weight as the
+ * three headline figures rather than being tucked underneath them.
+ */
+.layers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.layer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "name value"
+    "target detail";
+  gap: 2px var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--layer-row-border);
+}
+
+.layer:last-child {
+  border-bottom: none;
+}
+
+.layer__name {
+  grid-area: name;
+  color: var(--layer-label);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.layer__target {
+  grid-area: target;
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+}
+
+.layer__value {
+  grid-area: value;
+  color: var(--layer-value);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  text-align: right;
+}
+
+.layer__detail {
+  grid-area: detail;
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+  text-align: right;
+}
+
+/* A layer's status is carried by colour and by the words in the detail line,
+   never by colour alone. */
+.layer--ok .layer__value {
+  color: var(--status-ok);
+}
+
+.layer--warn .layer__value {
+  color: var(--status-warn);
+}
+
+.layer--bad .layer__value {
+  color: var(--status-bad);
+}
+
+/* ---------- Verdict ---------- */
+
+/*
+ * Three rows of numbers do not tell a non-technical reader which segment is at
+ * fault; they have to be told. This line is the whole point of the layered
+ * block, so it is a sentence, not an icon.
+ */
+.verdict {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--bg-raised);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+.verdict__dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  margin-top: 6px;
+  background: var(--fg-muted);
+}
+
+.verdict--ok .verdict__dot {
+  background: var(--status-ok);
+}
+
+.verdict--warn .verdict__dot {
+  background: var(--status-warn);
+}
+
+.verdict--bad .verdict__dot {
+  background: var(--status-bad);
+}
+
+.verdict__text strong {
+  color: var(--fg-primary);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.verdict__text span {
+  color: var(--fg-muted);
+}
+
+/* ---------- Language toggle ---------- */
+
+.lang-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.lang-toggle button {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.lang-toggle button[aria-pressed="true"] {
+  background: var(--bg-raised);
+  color: var(--fg-primary);
+}
+
+/* ---------- Shell navigation ---------- */
+
+/*
+ * Links between the shells. Each preview page is one shell of the same
+ * product, so moving between them should feel like changing view rather than
+ * visiting a different site.
+ */
+.shell-nav {
+  display: flex;
+  gap: var(--space-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 2px;
+}
+
+.shell-nav a {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.shell-nav a:hover {
+  color: var(--fg-primary);
+}
+
+.shell-nav a[aria-current="page"] {
+  background: var(--bg-raised);
+  color: var(--fg-primary);
+}

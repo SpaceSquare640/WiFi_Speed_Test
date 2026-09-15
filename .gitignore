@@ -1,0 +1,17 @@
+# This site has no build step, so there is nothing generated to ignore. What is
+# listed here is what other tools leave behind.
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Tooling artefacts that are not project content
+.semgrep/
+
+# Local notes must never reach a public branch
+notes/
+*.local.md

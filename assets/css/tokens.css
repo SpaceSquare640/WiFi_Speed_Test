@@ -1,0 +1,146 @@
+/*
+ * Design tokens, in three layers.
+ *
+ *   primitive  raw values, named after what they are
+ *        |
+ *   semantic   named after what they mean
+ *        |
+ *   component  named after where they are used
+ *
+ * Only the semantic layer is shared with the other shells. The Tauri desktop
+ * build and the Android app will define their own component layer on top of the
+ * same meanings, which is what keeps three separate codebases looking like one
+ * product. A component that reaches past the semantic layer to a raw hex value
+ * is the first step toward three products that merely resemble each other.
+ */
+
+:root {
+  /* ---------- Layer 1: primitive ---------- */
+
+  --grey-950: #0b0e14;
+  --grey-900: #141a24;
+  --grey-800: #1c2430;
+  --grey-700: #2a3441;
+  /* Lightened from #7d8590 after measuring: the original reached only 4.19:1
+     against --bg-raised, below the 4.5:1 that WCAG AA asks of body text, and
+     muted text sits on that surface in the metric chips and the verdict box.
+     This value clears it on all three backgrounds (5.08 / 5.68 / 6.28). */
+  --grey-500: #8b949e;
+  --grey-200: #c9d1d9;
+  --grey-100: #e6edf3;
+
+  --green-500: #3fb950;
+  --green-300: #7ee787;
+  --blue-500: #58a6ff;
+  --blue-300: #a5d6ff;
+  --amber-500: #d29922;
+  --amber-300: #e3b341;
+  --red-500: #f85149;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-md: 15px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+  --text-2xl: 34px;
+  --text-3xl: 46px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC",
+    "Microsoft JhengHei", Roboto, sans-serif;
+  /* Figures use a monospace face so that a digit changing during the animation
+     does not shift everything after it sideways. */
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas,
+    "Noto Sans Mono", monospace;
+
+  --duration-fast: 120ms;
+  --duration-mid: 260ms;
+  --duration-slow: 600ms;
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* ---------- Layer 2: semantic ---------- */
+
+  --bg-base: var(--grey-950);
+  --bg-panel: var(--grey-900);
+  --bg-raised: var(--grey-800);
+  --border-subtle: var(--grey-700);
+
+  --fg-primary: var(--grey-100);
+  --fg-secondary: var(--grey-200);
+  --fg-muted: var(--grey-500);
+
+  /* The three measurements carry a colour each, and the same three colours
+     appear in the command line tool. The colour is part of what the reader
+     learns, so it may not differ between shells. */
+  --accent-download: var(--green-500);
+  --accent-upload: var(--blue-500);
+  --accent-latency: var(--amber-500);
+  --danger: var(--red-500);
+
+  --status-ok: var(--green-500);
+  --status-warn: var(--amber-500);
+  --status-bad: var(--red-500);
+
+  /* ---------- Layer 3: component ---------- */
+
+  --gauge-track: var(--grey-700);
+  --gauge-arc-idle: var(--grey-500);
+  --gauge-arc-download: var(--accent-download);
+  --gauge-arc-upload: var(--accent-upload);
+  --gauge-arc-latency: var(--accent-latency);
+
+  --card-bg: var(--bg-panel);
+  --card-border: var(--border-subtle);
+  --card-radius: var(--radius-lg);
+  --card-pad: var(--space-4);
+
+  --button-bg: var(--accent-download);
+  --button-fg: var(--grey-950);
+  --button-bg-hover: var(--green-300);
+  --button-bg-disabled: var(--grey-700);
+  --button-fg-disabled: var(--grey-500);
+
+  --navbar-bg: var(--bg-panel);
+  --navbar-fg: var(--fg-muted);
+  --navbar-fg-active: var(--fg-primary);
+
+  --layer-row-border: var(--border-subtle);
+  --layer-label: var(--fg-secondary);
+  --layer-value: var(--fg-primary);
+
+  --banner-bg: var(--grey-800);
+  --banner-fg: var(--fg-secondary);
+  --banner-accent: var(--amber-500);
+
+  --phone-bezel: #05070b;
+  --phone-screen: var(--bg-base);
+}
+
+/*
+ * A viewer who has asked their system to reduce motion is telling us that
+ * animation costs them something. The simulation still runs; it simply arrives
+ * at its result without the theatre.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-mid: 0ms;
+    --duration-slow: 0ms;
+  }
+}

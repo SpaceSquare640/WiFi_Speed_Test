@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WiFi Speed Test — command line preview</title>
+    <meta
+      name="description"
+      content="A non-functional preview of the WiFi Speed Test command line tool. The layout is the real one; the figures are simulated."
+    />
+    <link rel="stylesheet" href="assets/css/tokens.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/terminal.css" />
+  </head>
+
+  <body>
+    <main class="stage stage--wide">
+      <header class="stage__head">
+        <div class="stage__toolbar">
+          <div>
+            <h1 class="stage__title">WiFi Speed Test</h1>
+            <p class="stage__subtitle">Command line preview</p>
+          </div>
+
+          <nav class="shell-nav" aria-label="Shells">
+            <a href="index.html">Home</a>
+            <a href="terminal.html" aria-current="page">Terminal</a>
+            <a href="mobile.html">Android</a>
+          </nav>
+        </div>
+
+        <p class="sim-banner">
+          <span class="sim-banner__mark" aria-hidden="true">!</span>
+          <span>
+            <strong>Simulated preview.</strong>
+            The layout, columns and wording below are exactly what the real tool
+            prints. Only the figures are invented, and the addresses shown are
+            documentation examples that route nowhere.
+          </span>
+        </p>
+      </header>
+
+      <div class="commands" role="group" aria-label="Example commands">
+        <button type="button" class="command-chip" data-command="wifitest" aria-pressed="true">
+          wifitest
+        </button>
+        <button type="button" class="command-chip" data-command="wifitest --json" aria-pressed="false">
+          wifitest --json
+        </button>
+        <button
+          type="button"
+          class="command-chip"
+          data-command="wifitest --watch --interval 30s"
+          aria-pressed="false"
+        >
+          wifitest --watch --interval 30s
+        </button>
+        <button
+          type="button"
+          class="command-chip"
+          data-command="wifitest --lang zh-TW"
+          aria-pressed="false"
+        >
+          wifitest --lang zh-TW
+        </button>
+        <button
+          type="button"
+          class="command-chip"
+          data-command="wifitest --layer1 192.0.2.1"
+          aria-pressed="false"
+        >
+          a fault on the first hop
+        </button>
+        <button type="button" class="command-chip" data-command="wifitest --help" aria-pressed="false">
+          wifitest --help
+        </button>
+      </div>
+
+      <section class="terminal" aria-label="Terminal output">
+        <div class="terminal__bar">
+          <span class="terminal__dots" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </span>
+          <span class="terminal__title">preview-host — wifitest</span>
+
+          <span class="terminal__actions">
+            <!-- The output is long and the animation is slow on purpose.
+                 Anyone who would rather read than watch can say so. -->
+            <button type="button" class="terminal__action" id="skip">Skip</button>
+            <button type="button" class="terminal__action" id="replay">Replay</button>
+          </span>
+        </div>
+
+        <pre class="terminal__body" id="terminal-body" aria-live="polite" tabindex="0"></pre>
+      </section>
+
+      <p class="exit-line" id="exit-line" hidden></p>
+    </main>
+
+    <script src="assets/js/fake-data.js"></script>
+    <script src="assets/js/sim-terminal.js"></script>
+  </body>
+</html>

@@ -1,0 +1,305 @@
+/* The landing page: what the tool is, and where to go to try each shell. */
+
+.page {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-weight: var(--weight-bold);
+}
+
+.topbar__brand img {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+}
+
+.topbar__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+}
+
+.hero__icon {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-lg);
+}
+
+.hero__title {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+}
+
+/* The tagline is the one sentence a visitor is guaranteed to read, so it is
+   allowed to be long and is given room rather than being squeezed. */
+.hero__tagline {
+  max-width: 34ch;
+  font-size: var(--text-lg);
+  color: var(--fg-secondary);
+  line-height: 1.45;
+}
+
+.hero__actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.button--quiet {
+  background: transparent;
+  color: var(--fg-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.button--quiet:hover:not(:disabled) {
+  background: var(--bg-raised);
+  color: var(--fg-primary);
+}
+
+/* ---------- Sections ---------- */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.section__title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+}
+
+.section__lead {
+  color: var(--fg-secondary);
+  max-width: 68ch;
+  line-height: 1.6;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-3);
+}
+
+.feature__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--weight-bold);
+  margin-bottom: var(--space-2);
+}
+
+.feature__body {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+/* The bar carries the measurement's colour, which is the same colour that
+   figure wears in every shell. */
+.feature__bar {
+  width: 22px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  flex: none;
+}
+
+.feature--latency .feature__bar {
+  background: var(--accent-latency);
+}
+
+.feature--download .feature__bar {
+  background: var(--accent-download);
+}
+
+.feature--upload .feature__bar {
+  background: var(--accent-upload);
+}
+
+/* ---------- The differentiator ---------- */
+
+/*
+ * Given a section of its own rather than a bullet in a list. It is the reason
+ * the project exists, and a visitor who skims everything else should still
+ * land on it.
+ */
+.difference {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 720px) {
+  .difference {
+    grid-template-columns: 1.1fr 1fr;
+    align-items: start;
+  }
+}
+
+.path {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.path__step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+}
+
+.path__rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.path__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--accent-latency);
+  margin-top: 5px;
+}
+
+.path__line {
+  flex: 1;
+  width: 2px;
+  background: var(--border-subtle);
+  min-height: 22px;
+}
+
+.path__step:last-child .path__line {
+  display: none;
+}
+
+.path__name {
+  font-weight: var(--weight-medium);
+}
+
+.path__meaning {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+/* ---------- Explore cards ---------- */
+
+.explore {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+
+.explore__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.explore__card:hover {
+  border-color: var(--fg-muted);
+  transform: translateY(-2px);
+}
+
+.explore__card[aria-disabled='true'] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.explore__name {
+  font-weight: var(--weight-bold);
+}
+
+.explore__body {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
+/* ---------- Platform matrix ---------- */
+
+.matrix-wrap {
+  overflow-x: auto;
+}
+
+.matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  min-width: 460px;
+}
+
+.matrix th,
+.matrix td {
+  text-align: left;
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.matrix th {
+  color: var(--fg-muted);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.matrix td:first-child {
+  color: var(--fg-primary);
+  font-weight: var(--weight-medium);
+}
+
+.matrix td {
+  color: var(--fg-muted);
+}
+
+/* ---------- Footer ---------- */
+
+.footer {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-4);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}

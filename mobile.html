@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WiFi Speed Test — Android app preview</title>
+    <meta
+      name="description"
+      content="A non-functional preview of the WiFi Speed Test Android app. All figures are simulated."
+    />
+    <link rel="stylesheet" href="assets/css/tokens.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/mobile.css" />
+  </head>
+
+  <body>
+    <main class="stage">
+      <header class="stage__head">
+        <div class="stage__toolbar">
+          <div>
+            <h1 class="stage__title">WiFi Speed Test</h1>
+            <p class="stage__subtitle">Android app preview</p>
+          </div>
+
+          <div style="display: flex; gap: var(--space-3); align-items: center">
+            <nav class="shell-nav" aria-label="Shells">
+              <a href="index.html">Home</a>
+              <a href="terminal.html">Terminal</a>
+              <a href="mobile.html" aria-current="page">Android</a>
+            </nav>
+
+            <div class="lang-toggle" role="group" data-i18n-label="langLabel">
+            <button type="button" data-lang="en" aria-pressed="true">EN</button>
+              <button type="button" data-lang="zh-TW" aria-pressed="false">中文</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stated before the app, not after it. A visitor should never reach
+             the numbers without having been told what they are. -->
+        <p class="sim-banner">
+          <span class="sim-banner__mark" aria-hidden="true">!</span>
+          <span>
+            <strong data-i18n="simNotice">Simulated preview.</strong>
+            <span data-i18n="simNoticeBody"></span>
+          </span>
+        </p>
+      </header>
+
+      <div class="scenarios" role="group" aria-label="Simulated network condition">
+        <button type="button" class="scenario-chip" data-scenario="random" aria-pressed="true">
+          Random
+        </button>
+        <button type="button" class="scenario-chip" data-scenario="healthy" aria-pressed="false">
+          Healthy
+        </button>
+        <button type="button" class="scenario-chip" data-scenario="localFault" aria-pressed="false">
+          Home network fault
+        </button>
+        <button
+          type="button"
+          class="scenario-chip"
+          data-scenario="internationalFault"
+          aria-pressed="false"
+        >
+          International congestion
+        </button>
+      </div>
+
+      <div class="phone">
+        <div class="phone__screen">
+          <div class="phone__notch" aria-hidden="true"></div>
+
+          <div class="phone__statusbar" aria-hidden="true">
+            <span class="numeric">9:41</span>
+            <span>▮▮▮ ▲ 100%</span>
+          </div>
+
+          <div class="app">
+            <div class="app__bar">
+              <span class="app__name" data-i18n="appName">WiFi Speed Test</span>
+            </div>
+
+            <!-- Test tab -->
+            <section class="app__body" id="tab-test">
+              <div class="gauge">
+                <div class="gauge__dial">
+                  <svg class="gauge__svg" viewBox="0 0 232 232" aria-hidden="true">
+                    <circle
+                      class="gauge__track"
+                      cx="116"
+                      cy="116"
+                      r="100"
+                      stroke-dasharray="471 628"
+                    />
+                    <circle id="gauge-arc" class="gauge__arc" cx="116" cy="116" r="100" />
+                  </svg>
+
+                  <div class="gauge__readout">
+                    <span class="gauge__value numeric" id="gauge-value">--</span>
+                    <span class="gauge__unit" id="gauge-unit"></span>
+                    <span class="gauge__phase" id="gauge-phase"></span>
+                  </div>
+                </div>
+
+                <span class="gauge__grade" id="gauge-grade"></span>
+
+                <button type="button" class="button" id="start" data-i18n="start">
+                  Start test
+                </button>
+              </div>
+
+              <div id="results" hidden>
+                <div class="metrics">
+                  <div class="metric metric--download">
+                    <div class="metric__label" data-i18n="download">Download</div>
+                    <div class="metric__value numeric">
+                      <span id="metric-download">--</span
+                      ><span class="metric__unit">Mbps</span>
+                    </div>
+                  </div>
+
+                  <div class="metric metric--upload">
+                    <div class="metric__label" data-i18n="upload">Upload</div>
+                    <div class="metric__value numeric">
+                      <span id="metric-upload">--</span><span class="metric__unit">Mbps</span>
+                    </div>
+                  </div>
+
+                  <div class="metric metric--latency">
+                    <div class="metric__label" data-i18n="latency">Ping</div>
+                    <div class="metric__value numeric">
+                      <span id="metric-latency">--</span><span class="metric__unit">ms</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- The differentiator. Given the same weight as the three
+                     figures above, because the question it answers is the one a
+                     plain speed test cannot. -->
+                <section class="card" style="margin-top: var(--space-4)">
+                  <h2 class="card__title" data-i18n="layered">Layered diagnostics</h2>
+                  <ul class="layers" id="layers"></ul>
+
+                  <div class="verdict" id="verdict">
+                    <span class="verdict__dot" aria-hidden="true"></span>
+                    <span class="verdict__text">
+                      <strong id="verdict-title"></strong>
+                      <span id="verdict-body"></span>
+                    </span>
+                  </div>
+                </section>
+              </div>
+            </section>
+
+            <!-- History tab -->
+            <section class="app__body" id="tab-history" hidden>
+              <div class="panel-empty">
+                <strong data-i18n="navHistory">History</strong>
+                <span data-i18n="comingSoon"></span>
+              </div>
+            </section>
+
+            <!-- Settings tab -->
+            <section class="app__body" id="tab-settings" hidden>
+              <div class="panel-empty">
+                <strong data-i18n="navSettings">Settings</strong>
+                <span data-i18n="comingSoon"></span>
+              </div>
+            </section>
+
+            <nav class="app__nav" aria-label="App sections">
+              <button type="button" data-tab="test" aria-current="page">
+                <span class="dot" aria-hidden="true"></span>
+                <span data-i18n="navTest">Test</span>
+              </button>
+              <button type="button" data-tab="history">
+                <span class="dot" aria-hidden="true"></span>
+                <span data-i18n="navHistory">History</span>
+              </button>
+              <button type="button" data-tab="settings">
+                <span class="dot" aria-hidden="true"></span>
+                <span data-i18n="navSettings">Settings</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <p class="sr-only" id="live-region" role="status" aria-live="polite"></p>
+    </main>
+
+    <script src="assets/js/i18n.js"></script>
+    <script src="assets/js/fake-data.js"></script>
+    <script>
+      // Language toggle and tab switching: small enough to live here rather
+      // than in a file of its own.
+      // init returns the language actually in force, which may come from a
+      // previous visit. The buttons have to agree with it, or the page reads as
+      // Chinese while the control insists it is English.
+      const active = I18n.init();
+      document.querySelectorAll('.lang-toggle button').forEach((button) => {
+        button.setAttribute('aria-pressed', String(button.dataset.lang === active));
+      });
+
+      document.querySelectorAll('.lang-toggle button').forEach((button) => {
+        button.addEventListener('click', () => {
+          I18n.set(button.dataset.lang);
+          document.querySelectorAll('.lang-toggle button').forEach((other) => {
+            other.setAttribute('aria-pressed', String(other === button));
+          });
+        });
+      });
+
+      const TABS = ['test', 'history', 'settings'];
+      document.querySelectorAll('.app__nav button').forEach((button) => {
+        button.addEventListener('click', () => {
+          const active = button.dataset.tab;
+          TABS.forEach((tab) => {
+            document.getElementById(`tab-${tab}`).hidden = tab !== active;
+          });
+          document.querySelectorAll('.app__nav button').forEach((other) => {
+            if (other === button) {
+              other.setAttribute('aria-current', 'page');
+            } else {
+              other.removeAttribute('aria-current');
+            }
+          });
+        });
+      });
+    </script>
+    <script src="assets/js/sim-mobile.js"></script>
+  </body>
+</html>

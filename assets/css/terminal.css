@@ -1,0 +1,198 @@
+/* The CLI preview: a terminal window replaying the real tool's output. */
+
+.stage--wide {
+  align-items: center;
+}
+
+.stage--wide .stage__head,
+.stage--wide .commands,
+.stage--wide .terminal {
+  width: min(860px, 100%);
+}
+
+/* ---------- Command palette ---------- */
+
+.commands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.command-chip {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  background: var(--bg-panel);
+  color: var(--fg-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: var(--space-2) var(--space-3);
+  transition: border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.command-chip:hover {
+  color: var(--fg-primary);
+  border-color: var(--fg-muted);
+}
+
+.command-chip[aria-pressed='true'] {
+  border-color: var(--accent-upload);
+  color: var(--fg-primary);
+}
+
+/* ---------- Window ---------- */
+
+.terminal {
+  background: var(--grey-950);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.terminal__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.terminal__dots {
+  display: flex;
+  gap: 6px;
+}
+
+.terminal__dots span {
+  width: 11px;
+  height: 11px;
+  border-radius: var(--radius-full);
+  background: var(--grey-700);
+}
+
+.terminal__title {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+}
+
+.terminal__actions {
+  margin-left: auto;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.terminal__action {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+}
+
+.terminal__action:hover {
+  color: var(--fg-primary);
+}
+
+.terminal__action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* The output scrolls inside its own box. A wide line must never make the page
+   itself scroll sideways. */
+.terminal__body {
+  margin: 0;
+  padding: var(--space-4);
+  min-height: 460px;
+  max-height: 60vh;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--fg-secondary);
+  white-space: pre;
+  tab-size: 4;
+}
+
+/* ---------- Output colouring ----------
+   The same four meanings the real tool paints: download green, upload blue,
+   latency amber, failure red. */
+
+.t-prompt {
+  color: var(--accent-download);
+}
+
+.t-command {
+  color: var(--fg-primary);
+}
+
+.t-dim {
+  color: var(--fg-muted);
+}
+
+.t-bold {
+  color: var(--fg-primary);
+  font-weight: var(--weight-bold);
+}
+
+.t-download {
+  color: var(--accent-download);
+}
+
+.t-upload {
+  color: var(--accent-upload);
+}
+
+.t-latency {
+  color: var(--accent-latency);
+}
+
+.t-bad {
+  color: var(--danger);
+}
+
+.t-key {
+  color: var(--accent-upload);
+}
+
+.t-string {
+  color: var(--accent-download);
+}
+
+.t-number {
+  color: var(--accent-latency);
+}
+
+.caret {
+  display: inline-block;
+  width: 8px;
+  height: 1.05em;
+  vertical-align: text-bottom;
+  background: var(--fg-primary);
+  animation: caret-blink 1s steps(2, start) infinite;
+}
+
+@keyframes caret-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    animation: none;
+  }
+}
+
+.exit-line {
+  margin-top: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
+.exit-line strong {
+  color: var(--fg-primary);
+}
