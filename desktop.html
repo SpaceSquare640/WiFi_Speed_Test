@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>WiFi Speed Test — desktop app preview</title>
+    <title>WiFi Speed Test — desktop previews</title>
     <meta
       name="description"
-      content="A non-functional preview of the WiFi Speed Test desktop app. All figures are simulated."
+      content="The WiFi Speed Test desktop app as it appears on Windows, macOS and Linux. All figures are simulated."
     />
     <link rel="icon" href="assets/img/icon.png" />
     <link rel="stylesheet" href="assets/css/tokens.css" />
@@ -20,7 +20,7 @@
       <header class="stage__head">
         <div class="stage__toolbar">
           <div>
-            <h1 class="stage__title">WiFi Speed Test</h1>
+            <h1 class="stage__title" data-i18n="desktopChooseTitle">Which desktop?</h1>
             <p class="stage__subtitle" data-i18n="desktopSubtitle">Desktop app preview</p>
           </div>
 
@@ -30,6 +30,7 @@
               <a href="terminal.html">Terminal</a>
               <a href="desktop.html" aria-current="page">Desktop</a>
               <a href="mobile.html">Android</a>
+              <a href="about.html">About</a>
             </nav>
 
             <div class="lang-toggle" role="group" data-i18n-label="langLabel">
@@ -39,180 +40,61 @@
           </div>
         </div>
 
-        <p class="sim-banner">
-          <span class="sim-banner__mark" aria-hidden="true">!</span>
-          <span>
-            <strong data-i18n="simNotice">Simulated preview.</strong>
-            <span data-i18n="simNoticeBody"></span>
-          </span>
-        </p>
-
-        <div class="scenarios" role="group" data-i18n-label="scenarioLabel">
-          <button
-            type="button"
-            class="scenario-chip"
-            data-scenario="random"
-            aria-pressed="true"
-            data-i18n="scenarioRandom"
-          >
-            Random
-          </button>
-          <button
-            type="button"
-            class="scenario-chip"
-            data-scenario="healthy"
-            aria-pressed="false"
-            data-i18n="scenarioHealthy"
-          >
-            Healthy
-          </button>
-          <button
-            type="button"
-            class="scenario-chip"
-            data-scenario="localFault"
-            aria-pressed="false"
-            data-i18n="scenarioLocal"
-          >
-            Home network fault
-          </button>
-          <button
-            type="button"
-            class="scenario-chip"
-            data-scenario="internationalFault"
-            aria-pressed="false"
-            data-i18n="scenarioIntl"
-          >
-            International congestion
-          </button>
-        </div>
+        <p class="section__lead" data-i18n="desktopChooseBody"></p>
       </header>
 
-      <section class="window" aria-label="Desktop application window">
-        <div class="window__bar">
-          <span class="window__dots" aria-hidden="true">
-            <span></span><span></span><span></span>
+      <div class="os-grid">
+        <!-- Each card previews the frame the page behind it shows, so the
+             choice is visible rather than only described. -->
+        <a class="os-card os-card--windows" href="desktop-windows.html">
+          <span class="os-card__frame" aria-hidden="true">
+            <span class="bar">
+              <span class="dot"></span>
+              <span class="spacer"></span>
+              <span class="sq"></span><span class="sq"></span><span class="sq"></span>
+            </span>
           </span>
-          <span class="window__title" data-i18n="windowTitle">WiFi Speed Test</span>
-        </div>
+          <span class="os-card__name" data-i18n="osWindows">Windows</span>
+          <span class="os-card__note" data-i18n="osWindowsNote"></span>
+        </a>
 
-        <div class="window__body">
-          <!-- Left: the measurement and the controls that shape it. -->
-          <div class="pane pane--left">
-            <div class="dial">
-              <svg viewBox="0 0 232 232" aria-hidden="true">
-                <circle class="dial__track" cx="116" cy="116" r="100" stroke-dasharray="471 628" />
-                <circle id="dial-arc" class="dial__arc" cx="116" cy="116" r="100" />
-              </svg>
+        <a class="os-card os-card--macos" href="desktop-macos.html">
+          <span class="os-card__frame" aria-hidden="true">
+            <span class="bar">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </span>
+          </span>
+          <span class="os-card__name" data-i18n="osMacos">macOS</span>
+          <span class="os-card__note" data-i18n="osMacosNote"></span>
+        </a>
 
-              <div class="dial__readout">
-                <span class="dial__value numeric" id="dial-value">--</span>
-                <span class="dial__unit" id="dial-unit"></span>
-                <span class="dial__phase" id="dial-phase"></span>
-              </div>
-            </div>
+        <a class="os-card os-card--linux" href="desktop-linux.html">
+          <span class="os-card__frame" aria-hidden="true">
+            <span class="bar">
+              <span class="spacer"></span>
+              <span class="pill"></span>
+              <span class="dot"></span>
+            </span>
+          </span>
+          <span class="os-card__name" data-i18n="osLinux">Linux</span>
+          <span class="os-card__note" data-i18n="osLinuxNote"></span>
+        </a>
+      </div>
 
-            <button type="button" class="button" id="start" data-i18n="start">Start test</button>
-
-            <div class="control">
-              <span class="control__label" data-i18n="endpointLabel">Endpoint</span>
-              <select class="select" id="endpoint" data-i18n-label="endpointLabel">
-                <option data-i18n="endpointAuto">Automatic (3 servers)</option>
-                <option>https://example.invalid/100mb</option>
-                <option>https://example.invalid/upload</option>
-              </select>
-              <!-- The built-in list really does ship empty; saying so here is
-                   more honest than inventing server names. -->
-              <span class="control__note" data-i18n="endpointNote"></span>
-            </div>
-
-            <div class="control">
-              <label class="switch">
-                <input type="checkbox" id="watch" />
-                <span data-i18n="watchLabel">Keep testing</span>
-              </label>
-              <span class="control__note" data-i18n="watchNote"></span>
-            </div>
-          </div>
-
-          <!-- Right: what the measurement means, then what came before it. -->
-          <div class="pane">
-            <div id="results" hidden>
-              <section>
-                <h2 class="card__title" data-i18n="summaryTitle">This run</h2>
-                <div class="summary metrics">
-                  <div class="metric metric--download">
-                    <div class="metric__label" data-i18n="download">Download</div>
-                    <div class="metric__value numeric">
-                      <span id="sum-download">--</span><span class="metric__unit">Mbps</span>
-                    </div>
-                  </div>
-                  <div class="metric metric--upload">
-                    <div class="metric__label" data-i18n="upload">Upload</div>
-                    <div class="metric__value numeric">
-                      <span id="sum-upload">--</span><span class="metric__unit">Mbps</span>
-                    </div>
-                  </div>
-                  <div class="metric metric--latency">
-                    <div class="metric__label" data-i18n="latency">Ping</div>
-                    <div class="metric__value numeric">
-                      <span id="sum-latency">--</span><span class="metric__unit">ms</span>
-                    </div>
-                  </div>
-                  <div class="metric">
-                    <div class="metric__label" data-i18n="grade">Grade</div>
-                    <div class="metric__value" id="sum-grade">--</div>
-                  </div>
-                </div>
-              </section>
-
-              <section class="card" style="margin-top: var(--space-4)">
-                <h2 class="card__title" data-i18n="layered">Layered diagnostics</h2>
-                <ul class="layers" id="layers"></ul>
-
-                <div class="verdict" id="verdict">
-                  <span class="verdict__dot" aria-hidden="true"></span>
-                  <span class="verdict__text">
-                    <strong id="verdict-title"></strong>
-                    <span id="verdict-body"></span>
-                  </span>
-                </div>
-              </section>
-            </div>
-
-            <section>
-              <h2 class="card__title" data-i18n="historyTitle">History</h2>
-
-              <table class="history">
-                <thead>
-                  <tr>
-                    <th scope="col" data-i18n="colTime">Time</th>
-                    <th scope="col" data-i18n="colDown">Down</th>
-                    <th scope="col" data-i18n="colUp">Up</th>
-                    <th scope="col" data-i18n="colPing">Ping</th>
-                  </tr>
-                </thead>
-                <tbody id="history-body"></tbody>
-              </table>
-
-              <p class="history-note" id="history-empty" data-i18n="historyEmpty"></p>
-              <p class="history-note" style="margin-top: var(--space-2)" data-i18n="localOnly"></p>
-            </section>
-          </div>
-        </div>
-      </section>
-
-      <p class="sr-only" id="live-region" role="status" aria-live="polite"></p>
+      <p class="sim-banner" style="width: min(1040px, 100%)">
+        <span class="sim-banner__mark" aria-hidden="true">!</span>
+        <span>
+          <strong data-i18n="simNotice">Simulated preview.</strong>
+          <span data-i18n="simNoticeBody"></span>
+        </span>
+      </p>
     </main>
 
     <script src="assets/js/i18n.js"></script>
-    <script src="assets/js/fake-data.js"></script>
     <script>
       const active = I18n.init();
       document.querySelectorAll('.lang-toggle button').forEach((button) => {
         button.setAttribute('aria-pressed', String(button.dataset.lang === active));
-      });
-
-      document.querySelectorAll('.lang-toggle button').forEach((button) => {
         button.addEventListener('click', () => {
           I18n.set(button.dataset.lang);
           document.querySelectorAll('.lang-toggle button').forEach((other) => {
@@ -221,6 +103,5 @@
         });
       });
     </script>
-    <script src="assets/js/sim-desktop.js"></script>
   </body>
 </html>

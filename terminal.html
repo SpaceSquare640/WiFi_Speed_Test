@@ -20,29 +20,35 @@
         <div class="stage__toolbar">
           <div>
             <h1 class="stage__title">WiFi Speed Test</h1>
-            <p class="stage__subtitle">Command line preview</p>
+            <p class="stage__subtitle" data-i18n="terminalSubtitle">Command line preview</p>
           </div>
 
+          <div style="display: flex; gap: var(--space-3); align-items: center">
           <nav class="shell-nav" aria-label="Shells">
             <a href="index.html">Home</a>
             <a href="terminal.html" aria-current="page">Terminal</a>
             <a href="desktop.html">Desktop</a>
             <a href="mobile.html">Android</a>
+            <a href="about.html">About</a>
           </nav>
+
+            <div class="lang-toggle" role="group" data-i18n-label="langLabel">
+              <button type="button" data-lang="en" aria-pressed="true">EN</button>
+              <button type="button" data-lang="zh-TW" aria-pressed="false">中文</button>
+            </div>
+          </div>
         </div>
 
         <p class="sim-banner">
           <span class="sim-banner__mark" aria-hidden="true">!</span>
           <span>
-            <strong>Simulated preview.</strong>
-            The layout, columns and wording below are exactly what the real tool
-            prints. Only the figures are invented, and the addresses shown are
-            documentation examples that route nowhere.
+            <strong data-i18n="simNotice">Simulated preview.</strong>
+            <span data-i18n="terminalNotice"></span>
           </span>
         </p>
       </header>
 
-      <div class="commands" role="group" aria-label="Example commands">
+      <div class="commands" role="group" data-i18n-label="exampleCommands">
         <button type="button" class="command-chip" data-command="wifitest" aria-pressed="true">
           wifitest
         </button>
@@ -70,9 +76,8 @@
           class="command-chip"
           data-command="wifitest --layer1 192.0.2.1"
           aria-pressed="false"
-        >
-          a fault on the first hop
-        </button>
+          data-i18n="cmdFault"
+        >a fault on the first hop</button>
         <button type="button" class="command-chip" data-command="wifitest --help" aria-pressed="false">
           wifitest --help
         </button>
@@ -88,8 +93,8 @@
           <span class="terminal__actions">
             <!-- The output is long and the animation is slow on purpose.
                  Anyone who would rather read than watch can say so. -->
-            <button type="button" class="terminal__action" id="skip">Skip</button>
-            <button type="button" class="terminal__action" id="replay">Replay</button>
+            <button type="button" class="terminal__action" id="skip" data-i18n="skip">Skip</button>
+            <button type="button" class="terminal__action" id="replay" data-i18n="replay">Replay</button>
           </span>
         </div>
 
@@ -99,7 +104,20 @@
       <p class="exit-line" id="exit-line" hidden></p>
     </main>
 
+    <script src="assets/js/i18n.js"></script>
     <script src="assets/js/fake-data.js"></script>
+    <script>
+      const active = I18n.init();
+      document.querySelectorAll('.lang-toggle button').forEach((button) => {
+        button.setAttribute('aria-pressed', String(button.dataset.lang === active));
+        button.addEventListener('click', () => {
+          I18n.set(button.dataset.lang);
+          document.querySelectorAll('.lang-toggle button').forEach((other) => {
+            other.setAttribute('aria-pressed', String(other === button));
+          });
+        });
+      });
+    </script>
     <script src="assets/js/sim-terminal.js"></script>
   </body>
 </html>

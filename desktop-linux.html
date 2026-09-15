@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WiFi Speed Test — Linux desktop preview</title>
+    <meta
+      name="description"
+      content="A non-functional preview of the WiFi Speed Test desktop app as it appears on Linux. All figures are simulated."
+    />
+    <link rel="icon" href="assets/img/icon.png" />
+    <link rel="stylesheet" href="assets/css/tokens.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/desktop.css" />
+  </head>
+
+  <body>
+    <main class="stage stage--desktop">
+      <header class="stage__head">
+        <div class="stage__toolbar">
+          <div>
+            <h1 class="stage__title">WiFi Speed Test</h1>
+            <p class="stage__subtitle">
+              <span data-i18n="osLinux">Linux</span> ·
+              <span data-i18n="desktopSubtitle">Desktop app preview</span>
+            </p>
+          </div>
+
+          <div style="display: flex; gap: var(--space-3); align-items: center">
+            <nav class="shell-nav" aria-label="Shells">
+              <a href="index.html">Home</a>
+              <a href="terminal.html">Terminal</a>
+              <a href="desktop.html" aria-current="page">Desktop</a>
+              <a href="mobile.html">Android</a>
+              <a href="about.html">About</a>
+            </nav>
+
+            <div class="lang-toggle" role="group" data-i18n-label="langLabel">
+              <button type="button" data-lang="en" aria-pressed="true">EN</button>
+              <button type="button" data-lang="zh-TW" aria-pressed="false">中文</button>
+            </div>
+          </div>
+        </div>
+
+        <p class="sim-banner">
+          <span class="sim-banner__mark" aria-hidden="true">!</span>
+          <span>
+            <strong data-i18n="simNotice">Simulated preview.</strong>
+            <span data-i18n="simNoticeBody"></span>
+          </span>
+        </p>
+
+        <div class="scenarios" role="group" data-i18n-label="scenarioLabel">
+          <button type="button" class="scenario-chip" data-scenario="random" aria-pressed="true" data-i18n="scenarioRandom">Random</button>
+          <button type="button" class="scenario-chip" data-scenario="healthy" aria-pressed="false" data-i18n="scenarioHealthy">Healthy</button>
+          <button type="button" class="scenario-chip" data-scenario="localFault" aria-pressed="false" data-i18n="scenarioLocal">Home network fault</button>
+          <button type="button" class="scenario-chip" data-scenario="internationalFault" aria-pressed="false" data-i18n="scenarioIntl">International congestion</button>
+        </div>
+      </header>
+
+      <section class="window window--linux" aria-label="Desktop application window">
+        <!-- GNOME puts the actions in the header bar itself and offers no
+             minimise button. -->
+        <div class="window__bar">
+          <span class="window__title" data-i18n="windowTitle">WiFi Speed Test</span>
+          <span class="headerbar-actions">
+            <button type="button" aria-label="Menu">&#8801;</button>
+            <button type="button" aria-label="Close">&#10005;</button>
+          </span>
+        </div>
+
+        <!-- The application itself is mounted here from desktop-shell.js. The
+             three platform pages differ in their frame, not in their app. -->
+        <div class="window__body" id="app"></div>
+      </section>
+
+      <p class="sr-only" id="live-region" role="status" aria-live="polite"></p>
+    </main>
+
+    <script src="assets/js/i18n.js"></script>
+    <script src="assets/js/fake-data.js"></script>
+    <script src="assets/js/desktop-shell.js"></script>
+    <script>
+      const active = I18n.init();
+      document.querySelectorAll('.lang-toggle button').forEach((button) => {
+        button.setAttribute('aria-pressed', String(button.dataset.lang === active));
+        button.addEventListener('click', () => {
+          I18n.set(button.dataset.lang);
+          document.querySelectorAll('.lang-toggle button').forEach((other) => {
+            other.setAttribute('aria-pressed', String(other === button));
+          });
+        });
+      });
+
+      DesktopShell.mount(document.getElementById('app'), {
+        scenarioChips: [...document.querySelectorAll('.scenario-chip')],
+        liveRegion: document.getElementById('live-region'),
+      });
+      I18n.apply();
+    </script>
+  </body>
+</html>

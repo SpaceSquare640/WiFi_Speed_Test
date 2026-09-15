@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WiFi Speed Test — about this preview</title>
+    <meta
+      name="description"
+      content="What is simulated on this site, how the real tool is built, and what it does with your data: nothing."
+    />
+    <link rel="icon" href="assets/img/icon.png" />
+    <link rel="stylesheet" href="assets/css/tokens.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/index.css" />
+  </head>
+
+  <body>
+    <div class="page">
+      <header class="topbar">
+        <span class="topbar__brand">
+          <img src="assets/img/icon.png" alt="" width="191" height="192" />
+          WiFi Speed Test
+        </span>
+
+        <span class="topbar__right">
+          <nav class="shell-nav" aria-label="Shells">
+            <a href="index.html">Home</a>
+            <a href="terminal.html">Terminal</a>
+            <a href="desktop.html">Desktop</a>
+            <a href="mobile.html">Android</a>
+            <a href="about.html" aria-current="page">About</a>
+          </nav>
+
+          <span class="lang-toggle" role="group" data-i18n-label="langLabel">
+            <button type="button" data-lang="en" aria-pressed="true">EN</button>
+            <button type="button" data-lang="zh-TW" aria-pressed="false">中文</button>
+          </span>
+        </span>
+      </header>
+
+      <section class="section">
+        <h1 class="section__title" data-i18n="aboutTitle">About this preview</h1>
+        <p class="section__lead" data-i18n="aboutIntro"></p>
+      </section>
+
+      <!-- First, because it is the thing a visitor most needs to know and the
+           thing a pretty interface is most likely to make them forget. -->
+      <section class="section">
+        <h2 class="section__title" data-i18n="aboutSimTitle">What is simulated</h2>
+        <p class="section__lead" data-i18n="aboutSimBody"></p>
+
+        <div class="card">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th scope="col" data-i18n="layer">Layer</th>
+                <th scope="col" data-i18n="target">Target</th>
+                <th scope="col">Range</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-i18n="layerGateway">Local gateway</td>
+                <td class="numeric">192.0.2.1</td>
+                <td>RFC 5737 TEST-NET-1</td>
+              </tr>
+              <tr>
+                <td data-i18n="layerRegional">Regional egress</td>
+                <td class="numeric">198.51.100.53</td>
+                <td>RFC 5737 TEST-NET-2</td>
+              </tr>
+              <tr>
+                <td data-i18n="layerInternational">International</td>
+                <td class="numeric">203.0.113.53</td>
+                <td>RFC 5737 TEST-NET-3</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section__title" data-i18n="aboutStackTitle">How the real tool is built</h2>
+        <p class="section__lead" data-i18n="aboutStackBody"></p>
+
+        <div class="grid-3">
+          <article class="card">
+            <h3 class="feature__title" data-i18n="aboutStackEngine">Measurement engine</h3>
+            <p class="feature__body" data-i18n="aboutStackEngineNote"></p>
+          </article>
+          <article class="card">
+            <h3 class="feature__title" data-i18n="aboutStackCli">Command line</h3>
+            <p class="feature__body" data-i18n="aboutStackCliNote"></p>
+          </article>
+          <article class="card">
+            <h3 class="feature__title" data-i18n="aboutStackDesktop">Desktop</h3>
+            <p class="feature__body" data-i18n="aboutStackDesktopNote"></p>
+          </article>
+          <article class="card">
+            <h3 class="feature__title" data-i18n="aboutStackApp">Android</h3>
+            <p class="feature__body" data-i18n="aboutStackAppNote"></p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section__title" data-i18n="aboutPrivacyTitle">Privacy</h2>
+        <p class="section__lead" data-i18n="aboutPrivacyBody"></p>
+      </section>
+
+      <section class="section">
+        <h2 class="section__title" data-i18n="aboutLicenceTitle">Licence</h2>
+        <p class="section__lead" data-i18n="aboutLicenceBody"></p>
+        <p>
+          <a href="https://github.com/SpaceSquare640/WiFi_Speed_Test" data-i18n="viewOnGitHub">
+            Source on GitHub
+          </a>
+        </p>
+      </section>
+
+      <section class="section">
+        <h2 class="section__title" data-i18n="aboutDisclaimerTitle">Disclaimer</h2>
+        <p class="sim-banner">
+          <span class="sim-banner__mark" aria-hidden="true">!</span>
+          <span data-i18n="aboutDisclaimerBody"></span>
+        </p>
+      </section>
+
+      <footer class="footer">
+        <span data-i18n="previewFooter"></span>
+        <span>Copyright (c) 2026 SpaceSquare · MIT</span>
+      </footer>
+    </div>
+
+    <script src="assets/js/i18n.js"></script>
+    <script>
+      const active = I18n.init();
+      document.querySelectorAll('.lang-toggle button').forEach((button) => {
+        button.setAttribute('aria-pressed', String(button.dataset.lang === active));
+        button.addEventListener('click', () => {
+          I18n.set(button.dataset.lang);
+          document.querySelectorAll('.lang-toggle button').forEach((other) => {
+            other.setAttribute('aria-pressed', String(other === button));
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

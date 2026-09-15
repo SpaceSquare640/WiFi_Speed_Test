@@ -89,6 +89,58 @@ const I18n = (() => {
       summaryTitle: 'This run',
       localOnly: 'Stored on this device only. Nothing is uploaded.',
 
+      // desktop: platform variants
+      desktopChooseTitle: 'Which desktop?',
+      desktopChooseBody:
+        'One application, three window frames. The app itself is identical; what differs is the chrome the system draws around it and the conventions that come with it.',
+      osWindows: 'Windows',
+      osMacos: 'macOS',
+      osLinux: 'Linux',
+      osWindowsNote: 'Caption buttons at the top right, square corners, a menu bar in the window.',
+      osMacosNote: 'Traffic lights at the top left, a unified title bar, the menu bar belongs to the system.',
+      osLinuxNote: 'A GNOME header bar: actions and close button in the bar itself, no separate menu.',
+      openPreview: 'Open',
+      backToChooser: 'Other desktops',
+      windowMenuFile: 'File',
+      windowMenuView: 'View',
+      windowMenuHelp: 'Help',
+
+      // about.html
+      aboutTitle: 'About this preview',
+      aboutIntro:
+        'This site exists so that the tool can be understood before it is installed. It is static, it measures nothing, and it sends nothing anywhere.',
+      aboutSimTitle: 'What is simulated',
+      aboutSimBody:
+        'Every figure on every page is generated in the browser when you press the button. There is no server behind this site and no measurement of any kind. The three layer targets are addresses the IETF reserves for documentation (RFC 5737), which by definition route nowhere, so nothing here can be mistaken for a live host.',
+      aboutStackTitle: 'How the real tool is built',
+      aboutStackBody:
+        'One measurement engine in Go, shared by every shell. The command line tool compiles from the same source; the desktop build runs the engine as a sidecar and reads its JSON; the Android build binds it as a library. None of the shells reimplements a measurement.',
+      aboutStackEngine: 'Measurement engine',
+      aboutStackEngineNote: 'Go. Network I/O and concurrency, and one command cross-compiles it for every platform.',
+      aboutStackCli: 'Command line',
+      aboutStackCliNote: 'Go, same source as the engine. A single static binary with no runtime to install.',
+      aboutStackDesktop: 'Desktop',
+      aboutStackDesktopNote: 'Tauri. A Rust shell around the system WebView, with this same HTML and CSS as its front end.',
+      aboutStackApp: 'Android',
+      aboutStackAppNote: 'Kotlin and Jetpack Compose, with the Go engine bound as a library.',
+      aboutPrivacyTitle: 'Privacy',
+      aboutPrivacyBody:
+        'This preview stores one thing: which language you chose, in your own browser. No analytics, no cookies, no fonts or scripts fetched from anywhere else. The page works with the network cable unplugged.',
+      aboutLicenceTitle: 'Licence',
+      aboutLicenceBody: 'MIT. The measurement code is public because a number you cannot audit is a number you cannot trust.',
+      aboutDisclaimerTitle: 'Disclaimer',
+      aboutDisclaimerBody:
+        'Nothing on this site is a measurement of your connection. Even in the real tool, a result is affected by everything else your machine and network are doing at the time, and should be read as an indication rather than a verdict.',
+
+      // terminal.html
+      terminalSubtitle: 'Command line preview',
+      terminalNotice:
+        'The layout, columns and wording below are exactly what the real tool prints. Only the figures are invented, and the addresses shown are documentation examples that route nowhere.',
+      cmdFault: 'a fault on the first hop',
+      skip: 'Skip',
+      replay: 'Replay',
+      exampleCommands: 'Example commands',
+
       langLabel: 'Language',
 
       // index.html
@@ -213,6 +265,58 @@ const I18n = (() => {
       trendRuns: '次',
       summaryTitle: '本次結果',
       localOnly: '僅儲存於本機裝置，不會上傳任何資料。',
+
+      // desktop: platform variants
+      desktopChooseTitle: '選擇桌面平台',
+      desktopChooseBody:
+        '同一個應用程式，三種視窗外框。應用本體完全相同，不同的是系統替它畫的外框，以及隨之而來的操作慣例。',
+      osWindows: 'Windows',
+      osMacos: 'macOS',
+      osLinux: 'Linux',
+      osWindowsNote: '控制鈕在右上角、直角邊框、選單列位於視窗內。',
+      osMacosNote: '紅黃綠燈在左上角、統一標題列，選單列屬於系統而非視窗。',
+      osLinuxNote: 'GNOME headerbar：操作與關閉鍵直接在標題列上，無獨立選單列。',
+      openPreview: '開啟',
+      backToChooser: '其他桌面平台',
+      windowMenuFile: '檔案',
+      windowMenuView: '檢視',
+      windowMenuHelp: '說明',
+
+      // about.html
+      aboutTitle: '關於本展示',
+      aboutIntro:
+        '本站的存在是為了讓人在安裝之前就能理解這個工具。它是靜態網頁，不進行任何量測，也不會把任何資料送到任何地方。',
+      aboutSimTitle: '哪些是模擬的',
+      aboutSimBody:
+        '每一頁的每一個數字，都是你按下按鈕時在瀏覽器中當場產生的。本站背後沒有伺服器，也沒有任何形式的量測。三層目標使用 IETF 保留供文件使用的位址（RFC 5737），依定義不會路由到任何地方，因此不可能被誤認為真實主機。',
+      aboutStackTitle: '真實工具的架構',
+      aboutStackBody:
+        '一個以 Go 寫成的量測引擎，由所有外殼共用。終端機版與引擎同源編譯；桌面版將引擎作為 sidecar 執行並讀取其 JSON；Android 版則以函式庫形式綁定。沒有任何一個外殼重新實作量測邏輯。',
+      aboutStackEngine: '量測引擎',
+      aboutStackEngineNote: 'Go。網路 I/O 與併發是它的本命領域，且一行指令即可交叉編譯全平台。',
+      aboutStackCli: '終端機',
+      aboutStackCliNote: 'Go，與引擎同源。單一靜態執行檔，無需安裝任何執行環境。',
+      aboutStackDesktop: '桌面',
+      aboutStackDesktopNote: 'Tauri。以 Rust 外殼包住系統 WebView，前端即為這一套 HTML 與 CSS。',
+      aboutStackApp: 'Android',
+      aboutStackAppNote: 'Kotlin 與 Jetpack Compose，並以函式庫形式綁定 Go 引擎。',
+      aboutPrivacyTitle: '隱私',
+      aboutPrivacyBody:
+        '本展示只儲存一件事：你選擇的語言，存在你自己的瀏覽器裡。無分析工具、無 cookie、不從任何外部來源載入字型或腳本。拔掉網路線這個頁面照樣運作。',
+      aboutLicenceTitle: '授權',
+      aboutLicenceBody: 'MIT。量測程式碼公開，因為一個你無法查核的數字，就是一個你無法信任的數字。',
+      aboutDisclaimerTitle: '免責聲明',
+      aboutDisclaimerBody:
+        '本站的任何內容都不是對你連線品質的量測。即使是真實工具，結果也會受到你的裝置與網路當下所有其他活動影響，應視為參考指標而非定論。',
+
+      // terminal.html
+      terminalSubtitle: '終端機展示',
+      terminalNotice:
+        '以下的排版、欄位與用詞，與真實工具實際輸出完全一致。僅有數值為虛構，顯示的位址為文件範例位址，不指向任何真實主機。',
+      cmdFault: '第一跳故障情境',
+      skip: '跳過',
+      replay: '重播',
+      exampleCommands: '指令範例',
 
       langLabel: '語言',
 

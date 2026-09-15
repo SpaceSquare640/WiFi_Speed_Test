@@ -11,38 +11,170 @@
 
 /* ---------- Window chrome ---------- */
 
+/*
+ * Three frames, one application. Tauri renders in the system WebView, so what
+ * the user sees around the app is whatever the platform draws: where the close
+ * button sits, whether a menu bar belongs to the window or to the system, how
+ * sharp the corners are. Those conventions are not decoration — a window that
+ * puts its close button on the wrong side reads as foreign on that desktop.
+ */
+
 .window {
-  background: var(--bg-panel);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  background: var(--bg-panel);
 }
 
 .window__bar {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-3);
   background: var(--bg-raised);
   border-bottom: 1px solid var(--border-subtle);
-}
-
-.window__dots {
-  display: flex;
-  gap: 6px;
-}
-
-.window__dots span {
-  width: 11px;
-  height: 11px;
-  border-radius: var(--radius-full);
-  background: var(--grey-700);
 }
 
 .window__title {
   font-size: var(--text-xs);
   color: var(--fg-muted);
+}
+
+.window__icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+
+/* --- Windows: caption buttons at the top right, square corners, menu bar in
+       the window itself. --- */
+
+.window--windows {
+  border-radius: 8px;
+}
+
+.window--windows .window__title {
+  color: var(--fg-secondary);
+}
+
+.window--windows .caption {
+  margin-left: auto;
+  display: flex;
+}
+
+.window--windows .caption button {
+  width: 42px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  color: var(--fg-muted);
+  font-size: 11px;
+  border-radius: 2px;
+}
+
+.window--windows .caption button:hover {
+  background: var(--grey-700);
+  color: var(--fg-primary);
+}
+
+.window--windows .caption button:last-child:hover {
+  background: var(--danger);
+  color: var(--grey-100);
+}
+
+.menubar {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
+/* --- macOS: traffic lights at the top left, title centred, generous
+       rounding, and no menu bar because it belongs to the system. --- */
+
+.window--macos {
+  border-radius: 12px;
+}
+
+.window--macos .window__bar {
+  position: relative;
+  justify-content: flex-start;
+  padding: var(--space-3);
+}
+
+.window--macos .traffic {
+  display: flex;
+  gap: 8px;
+}
+
+.window--macos .traffic span {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+}
+
+.window--macos .traffic span:nth-child(1) {
+  background: #ff5f57;
+}
+
+.window--macos .traffic span:nth-child(2) {
+  background: #febc2e;
+}
+
+.window--macos .traffic span:nth-child(3) {
+  background: #28c840;
+}
+
+.window--macos .window__title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-weight: var(--weight-medium);
+  color: var(--fg-secondary);
+  pointer-events: none;
+}
+
+/* --- Linux (GNOME): a header bar that is the toolbar. Actions live in it,
+       the close button sits at the right, and there is no minimise. --- */
+
+.window--linux {
+  border-radius: 12px;
+}
+
+.window--linux .window__bar {
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+}
+
+.window--linux .window__title {
+  font-weight: var(--weight-bold);
+  color: var(--fg-primary);
+  font-size: var(--text-sm);
+}
+
+.window--linux .headerbar-actions {
+  margin-left: auto;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.window--linux .headerbar-actions button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background: var(--grey-700);
+  color: var(--fg-secondary);
+  font-size: 12px;
+}
+
+.window--linux .headerbar-actions button:hover {
+  background: var(--grey-500);
+  color: var(--grey-950);
 }
 
 .window__body {
@@ -260,4 +392,109 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: var(--space-2);
+}
+
+/* ---------- Platform chooser ---------- */
+
+.os-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: var(--space-3);
+  width: min(1040px, 100%);
+}
+
+.os-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.os-card:hover {
+  border-color: var(--fg-muted);
+  transform: translateY(-2px);
+}
+
+.os-card__name {
+  font-weight: var(--weight-bold);
+}
+
+.os-card__note {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+/* A miniature of the frame that page shows, so the choice is visible rather
+   than described. */
+.os-card__frame {
+  height: 54px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-base);
+  display: flex;
+  flex-direction: column;
+}
+
+.os-card__frame .bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 8px;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.os-card__frame .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--grey-700);
+}
+
+.os-card__frame .spacer {
+  flex: 1;
+}
+
+.os-card__frame .sq {
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--grey-500);
+}
+
+.os-card--macos .os-card__frame {
+  border-radius: 10px;
+}
+
+.os-card--macos .dot:nth-child(1) {
+  background: #ff5f57;
+}
+
+.os-card--macos .dot:nth-child(2) {
+  background: #febc2e;
+}
+
+.os-card--macos .dot:nth-child(3) {
+  background: #28c840;
+}
+
+.os-card--windows .os-card__frame {
+  border-radius: 6px;
+}
+
+.os-card--linux .os-card__frame {
+  border-radius: 10px;
+}
+
+.os-card--linux .pill {
+  width: 16px;
+  height: 9px;
+  border-radius: var(--radius-full);
+  background: var(--grey-700);
 }
