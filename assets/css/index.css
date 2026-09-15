@@ -26,7 +26,7 @@
 
 .topbar__brand img {
   width: 28px;
-  height: 28px;
+  height: auto;
   border-radius: var(--radius-sm);
 }
 
@@ -46,9 +46,11 @@
   gap: var(--space-4);
 }
 
+/* The asset is cropped to its content and is square, so a square box no longer
+   distorts it. height: auto keeps that true if the artwork is ever replaced. */
 .hero__icon {
   width: 96px;
-  height: 96px;
+  height: auto;
   border-radius: var(--radius-lg);
 }
 
