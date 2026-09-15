@@ -1,0 +1,263 @@
+/* The desktop preview: a Tauri window with the app inside it. */
+
+.stage--desktop {
+  align-items: center;
+}
+
+.stage--desktop .stage__head,
+.stage--desktop .window {
+  width: min(1040px, 100%);
+}
+
+/* ---------- Window chrome ---------- */
+
+.window {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.window__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.window__dots {
+  display: flex;
+  gap: 6px;
+}
+
+.window__dots span {
+  width: 11px;
+  height: 11px;
+  border-radius: var(--radius-full);
+  background: var(--grey-700);
+}
+
+.window__title {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
+.window__body {
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--bg-base);
+}
+
+/* Two columns once there is room: the measurement on the left, what it means
+   on the right. Below that width they stack, which is also how the window
+   behaves when a user drags it narrow. */
+@media (min-width: 860px) {
+  .window__body {
+    grid-template-columns: 340px 1fr;
+  }
+}
+
+.pane {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.pane--left {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+@media (min-width: 860px) {
+  .pane--left {
+    border-bottom: none;
+    border-right: 1px solid var(--border-subtle);
+  }
+}
+
+/* ---------- Gauge ---------- */
+
+.dial {
+  position: relative;
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+.dial svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(135deg);
+}
+
+.dial__track {
+  fill: none;
+  stroke: var(--gauge-track);
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+.dial__arc {
+  fill: none;
+  stroke: var(--gauge-arc-idle);
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--duration-mid) var(--ease-out),
+    stroke var(--duration-mid) var(--ease-out);
+}
+
+.dial__arc--download {
+  stroke: var(--gauge-arc-download);
+}
+
+.dial__arc--upload {
+  stroke: var(--gauge-arc-upload);
+}
+
+.dial__arc--latency {
+  stroke: var(--gauge-arc-latency);
+}
+
+.dial__readout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.dial__value {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+}
+
+.dial__unit {
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+
+.dial__phase {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  min-height: 1.2em;
+}
+
+/* ---------- Controls ---------- */
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.control__label {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.select {
+  width: 100%;
+  background: var(--bg-raised);
+  color: var(--fg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.control__note {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  line-height: 1.5;
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.switch input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-download);
+}
+
+/* ---------- History ---------- */
+
+.history {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.history th,
+.history td {
+  text-align: right;
+  padding: var(--space-2) var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.history th:first-child,
+.history td:first-child {
+  text-align: left;
+}
+
+.history th {
+  color: var(--fg-muted);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.history tr:last-child td {
+  border-bottom: none;
+}
+
+.history td {
+  color: var(--fg-secondary);
+}
+
+.history .down {
+  color: var(--accent-download);
+}
+
+.history .up {
+  color: var(--accent-upload);
+}
+
+.history .ping {
+  color: var(--accent-latency);
+}
+
+/* The newest row is the run just finished; it should be findable at a glance. */
+.history tr[data-latest='true'] td {
+  background: var(--bg-raised);
+}
+
+.history-note {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
+/* ---------- Summary strip ---------- */
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--space-2);
+}

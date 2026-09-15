@@ -38,6 +38,9 @@
   };
 
   let running = false;
+  // The phase currently on screen, so that switching language mid-run can
+  // repaint it rather than leaving one label in the previous language.
+  let phaseKey = 'idle';
   let forcedScenario = null;
   let lastReport = null;
 
@@ -66,7 +69,8 @@
    */
   function animatePhase(phase, target, unit, scale) {
     return new Promise((resolve) => {
-      el.phase.textContent = I18n.t(phase.key);
+      phaseKey = phase.key;
+      el.phase.textContent = I18n.t(phaseKey);
 
       let settled = false;
       const finish = () => {
@@ -190,14 +194,16 @@
     await animatePhase(PHASES[2], report.upload, 'Mbps', 60);
     await wait(180);
 
-    el.phase.textContent = I18n.t(PHASES[3].key);
+    phaseKey = PHASES[3].key;
+    el.phase.textContent = I18n.t(phaseKey);
     await wait(PHASES[3].ms);
 
     // The dial ends on the download figure, which is the number people mean
     // when they ask how fast their connection is.
     setReadout(report.download.toFixed(1), 'Mbps');
     setArc(Math.min(1, report.download / 150), 'download');
-    el.phase.textContent = I18n.t('phaseDone');
+    phaseKey = 'phaseDone';
+    el.phase.textContent = I18n.t(phaseKey);
 
     renderResults(report);
 
@@ -221,10 +227,8 @@
   // Re-render the last result in the new language rather than leaving a mix of
   // both on screen.
   document.addEventListener('languagechange', () => {
-    if (!running) {
-      el.start.textContent = I18n.t(lastReport ? 'again' : 'start');
-      el.phase.textContent = lastReport ? I18n.t('phaseDone') : I18n.t('idle');
-    }
+    if (!running) el.start.textContent = I18n.t(lastReport ? 'again' : 'start');
+    el.phase.textContent = I18n.t(phaseKey);
     if (lastReport) renderResults(lastReport);
   });
 

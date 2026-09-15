@@ -27,6 +27,7 @@
             <nav class="shell-nav" aria-label="Shells">
               <a href="index.html">Home</a>
               <a href="terminal.html">Terminal</a>
+              <a href="desktop.html">Desktop</a>
               <a href="mobile.html" aria-current="page">Android</a>
             </nav>
 
@@ -48,23 +49,20 @@
         </p>
       </header>
 
-      <div class="scenarios" role="group" aria-label="Simulated network condition">
-        <button type="button" class="scenario-chip" data-scenario="random" aria-pressed="true">
-          Random
+      <div class="scenarios" role="group" data-i18n-label="scenarioLabel">
+        <button type="button" class="scenario-chip" data-scenario="random" aria-pressed="true" data-i18n="scenarioRandom">Random
         </button>
-        <button type="button" class="scenario-chip" data-scenario="healthy" aria-pressed="false">
-          Healthy
+        <button type="button" class="scenario-chip" data-scenario="healthy" aria-pressed="false" data-i18n="scenarioHealthy">Healthy
         </button>
-        <button type="button" class="scenario-chip" data-scenario="localFault" aria-pressed="false">
-          Home network fault
+        <button type="button" class="scenario-chip" data-scenario="localFault" aria-pressed="false" data-i18n="scenarioLocal">Home network fault
         </button>
         <button
           type="button"
           class="scenario-chip"
           data-scenario="internationalFault"
           aria-pressed="false"
-        >
-          International congestion
+          data-i18n="scenarioIntl"
+        >International congestion
         </button>
       </div>
 

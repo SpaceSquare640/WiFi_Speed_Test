@@ -63,6 +63,32 @@ const I18n = (() => {
       navSettings: 'Settings',
       comingSoon: 'Shown for layout only in this preview.',
 
+      // shared: scenario switch
+      scenarioLabel: 'Simulated condition',
+      scenarioRandom: 'Random',
+      scenarioHealthy: 'Healthy',
+      scenarioLocal: 'Home network fault',
+      scenarioIntl: 'International congestion',
+
+      // desktop.html
+      desktopSubtitle: 'Desktop app preview',
+      windowTitle: 'WiFi Speed Test',
+      endpointLabel: 'Endpoint',
+      endpointAuto: 'Automatic (3 servers)',
+      endpointNote: 'The built-in list ships empty until each candidate is cleared. Until then, you supply your own.',
+      watchLabel: 'Keep testing',
+      watchNote: 'Repeats every 30 seconds and records each pass.',
+      historyTitle: 'History',
+      historyEmpty: 'No runs recorded yet.',
+      colTime: 'Time',
+      colDown: 'Down',
+      colUp: 'Up',
+      colPing: 'Ping',
+      trendTitle: 'Trend',
+      trendRuns: 'runs',
+      summaryTitle: 'This run',
+      localOnly: 'Stored on this device only. Nothing is uploaded.',
+
       langLabel: 'Language',
 
       // index.html
@@ -88,7 +114,7 @@ const I18n = (() => {
       exploreMobile: 'Android app',
       exploreMobileBody: 'Tap through a simulated run.',
       exploreDesktop: 'Desktop app',
-      exploreDesktopBody: 'Not built yet.',
+      exploreDesktopBody: 'Watch a run with the window at full size.',
       platformsTitle: 'Platforms',
       platformCli: 'Command line',
       platformDesktop: 'Desktop',
@@ -162,6 +188,32 @@ const I18n = (() => {
       navSettings: '設定',
       comingSoon: '此 Preview 僅呈現版面，無實際內容。',
 
+      // shared: scenario switch
+      scenarioLabel: '模擬情境',
+      scenarioRandom: '隨機',
+      scenarioHealthy: '連線正常',
+      scenarioLocal: '家中網路異常',
+      scenarioIntl: '國際頻寬壅塞',
+
+      // desktop.html
+      desktopSubtitle: '桌面應用展示',
+      windowTitle: 'WiFi 測速工具',
+      endpointLabel: '測速端點',
+      endpointAuto: '自動（3 台伺服器）',
+      endpointNote: '內建清單在每個候選端點通過檢查前維持空白。在此之前，由你自行指定。',
+      watchLabel: '持續監控',
+      watchNote: '每 30 秒重複一次，並記錄每次結果。',
+      historyTitle: '歷史記錄',
+      historyEmpty: '尚無記錄。',
+      colTime: '時間',
+      colDown: '下載',
+      colUp: '上傳',
+      colPing: '延遲',
+      trendTitle: '趨勢',
+      trendRuns: '次',
+      summaryTitle: '本次結果',
+      localOnly: '僅儲存於本機裝置，不會上傳任何資料。',
+
       langLabel: '語言',
 
       // index.html
@@ -186,7 +238,7 @@ const I18n = (() => {
       exploreMobile: 'Android App',
       exploreMobileBody: '實際點過一次模擬測速。',
       exploreDesktop: '桌面應用',
-      exploreDesktopBody: '尚未建置。',
+      exploreDesktopBody: '在完整視窗中看一次測速流程。',
       platformsTitle: '支援平台',
       platformCli: '終端機',
       platformDesktop: '桌面',
