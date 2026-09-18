@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WiFi Speed Test</title>
+    <link rel="stylesheet" href="app.css" />
+  </head>
+
+  <body>
+    <header class="toolbar">
+      <button type="button" class="run" id="run">Run test</button>
+
+      <label class="field">
+        Probe
+        <select id="method">
+          <option value="tcp">TCP handshake</option>
+          <option value="icmp">ICMP (may need elevation)</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <input type="checkbox" id="watch" />
+        Keep testing
+      </label>
+
+      <span class="toolbar__spacer"></span>
+      <span class="phase" id="phase">idle</span>
+    </header>
+
+    <main class="main">
+      <div class="left">
+        <section>
+          <h2 class="section-label">Path</h2>
+          <!-- Left to right, in the order the packets travel. Selecting a hop
+               fills the panel on the right. -->
+          <div class="path" id="path" role="tablist" aria-label="Path segments"></div>
+        </section>
+
+        <section>
+          <h2 class="section-label">Reading</h2>
+          <div class="verdict" id="verdict">
+            <strong id="verdict-title">No test has run yet</strong>
+            <span id="verdict-body">
+              Run a test to see which segment of the path is responsible for what
+              you are experiencing.
+            </span>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="section-label">Throughput</h2>
+          <div class="rates">
+            <div class="rate rate--download">
+              <div class="rate__label">Download</div>
+              <div class="rate__value is-absent" id="download">not measured</div>
+            </div>
+            <div class="rate rate--upload">
+              <div class="rate__label">Upload</div>
+              <div class="rate__value is-absent" id="upload">not measured</div>
+            </div>
+            <div class="rate rate--dns">
+              <div class="rate__label">DNS</div>
+              <div class="rate__value is-absent" id="dns">not measured</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="side" id="detail">
+        <p class="empty" id="detail-empty">
+          Select a segment of the path to see its round-trip time, jitter, packet
+          loss, and what a fault there would mean.
+        </p>
+
+        <div id="detail-body" hidden>
+          <div class="detail__title" id="detail-title"></div>
+          <div class="detail__target" id="detail-target"></div>
+
+          <dl class="kv">
+            <dt>Latency</dt>
+            <dd id="d-latency">—</dd>
+            <dt>Jitter</dt>
+            <dd id="d-jitter">—</dd>
+            <dt>Packet loss</dt>
+            <dd id="d-loss">—</dd>
+            <dt>Answered on port</dt>
+            <dd id="d-port">—</dd>
+            <dt>Target source</dt>
+            <dd id="d-source">—</dd>
+          </dl>
+
+          <p class="meaning" id="d-meaning"></p>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="status">
+      <span id="s-time">never run</span>
+      <span>·</span>
+      <span id="s-schema">schema —</span>
+      <span>·</span>
+      <span class="status__code" id="s-exit" data-ok="true">exit —</span>
+      <span class="status__spacer"></span>
+      <button type="button" id="toggle-raw">raw payload</button>
+    </footer>
+
+    <pre class="raw" id="raw" hidden></pre>
+
+    <script src="app.js"></script>
+  </body>
+</html>

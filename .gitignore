@@ -13,6 +13,13 @@ config.toml
 *.local.toml
 history.jsonl
 
+# Tauri desktop build artefacts. The sidecar is the engine compiled from the
+# source already in this repository, so committing it would store the same
+# program twice — once as source, once as seven megabytes of binary.
+desktop/src-tauri/target/
+desktop/src-tauri/gen/
+desktop/src-tauri/binaries/
+
 # Go
 *.test
 *.out

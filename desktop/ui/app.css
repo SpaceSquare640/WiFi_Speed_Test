@@ -1,0 +1,442 @@
+/*
+ * The desktop application's own interface.
+ *
+ * Designed for this window rather than adapted from the preview site: a path
+ * laid out left to right the way the packets travel, a detail panel for
+ * whichever segment is selected, and a status bar carrying the things a desktop
+ * user checks — schema version, exit code, when it last ran.
+ *
+ * The three measurement colours are the exception to "designed from scratch".
+ * Download green, upload blue, latency amber are fixed at the command line, and
+ * a user who reads both should not have to learn them twice.
+ */
+
+:root {
+  --bg: #0d1017;
+  --bg-raised: #161b24;
+  --bg-sunken: #090b10;
+  --line: #262d3a;
+  --line-strong: #3a4454;
+
+  --fg: #e8eef6;
+  --fg-dim: #96a0af;
+  --fg-faint: #6a7483;
+
+  --download: #3fb950;
+  --upload: #58a6ff;
+  --latency: #d29922;
+  --bad: #f85149;
+  --ok: #3fb950;
+
+  --pad: 16px;
+  --radius: 8px;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, "Noto Sans Mono", monospace;
+  --ui: -apple-system, "Segoe UI Variable Text", "Segoe UI", "Noto Sans TC",
+    "Microsoft JhengHei", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden; /* the window is the viewport; panels scroll, the app does not */
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--ui);
+  font-size: 14px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  user-select: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+:where(button, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--upload);
+  outline-offset: 2px;
+}
+
+/* ---------- Toolbar ---------- */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px var(--pad);
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--line);
+}
+
+.run {
+  background: var(--download);
+  color: #07130a;
+  font-weight: 600;
+  padding: 7px 18px;
+  border-radius: var(--radius);
+}
+
+.run:disabled {
+  background: var(--line-strong);
+  color: var(--fg-faint);
+  cursor: default;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-dim);
+  font-size: 12px;
+}
+
+.field select {
+  background: var(--bg-sunken);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 12px;
+}
+
+.toolbar__spacer {
+  flex: 1;
+}
+
+.phase {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--fg-dim);
+  min-width: 18ch;
+  text-align: right;
+}
+
+/* ---------- Main split ---------- */
+
+.main {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  min-height: 0;
+}
+
+.left {
+  padding: var(--pad);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: auto;
+}
+
+.side {
+  border-left: 1px solid var(--line);
+  padding: var(--pad);
+  background: var(--bg-raised);
+  overflow: auto;
+}
+
+.section-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  margin-bottom: 10px;
+}
+
+/* ---------- The path ----------
+   Three segments in the order the packets travel. A vertical list would have
+   been easier; the horizontal run is what makes "which segment" a place rather
+   than a row. */
+
+.path {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: start;
+  gap: 0;
+}
+
+.hop {
+  position: relative;
+  padding: 14px 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-raised);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.hop:first-child {
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+
+.hop:last-child {
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.hop + .hop {
+  border-left: none;
+}
+
+.hop:hover {
+  background: #1b2230;
+}
+
+.hop[aria-selected='true'] {
+  border-color: var(--line-strong);
+  background: #1b2230;
+}
+
+.hop__name {
+  font-size: 12px;
+  color: var(--fg-dim);
+}
+
+.hop__value {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 600;
+  margin-top: 6px;
+  color: var(--latency);
+  line-height: 1.1;
+}
+
+.hop__value.is-silent {
+  font-size: 15px;
+  color: var(--bad);
+}
+
+.hop__value.is-idle {
+  color: var(--fg-faint);
+}
+
+.hop__target {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg-faint);
+  margin-top: 4px;
+}
+
+/* A bar under each hop, carrying its status without relying on colour alone —
+   the detail panel states it in words. */
+.hop__bar {
+  height: 3px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background: var(--line-strong);
+}
+
+.hop--ok .hop__bar {
+  background: var(--ok);
+}
+
+.hop--warn .hop__bar {
+  background: var(--latency);
+}
+
+.hop--bad .hop__bar {
+  background: var(--bad);
+}
+
+/* ---------- Verdict ---------- */
+
+.verdict {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  background: var(--bg-raised);
+  line-height: 1.5;
+}
+
+.verdict--ok {
+  border-left-color: var(--ok);
+}
+
+.verdict--warn {
+  border-left-color: var(--latency);
+}
+
+.verdict--bad {
+  border-left-color: var(--bad);
+}
+
+.verdict strong {
+  display: block;
+  margin-bottom: 3px;
+}
+
+.verdict span {
+  color: var(--fg-dim);
+  font-size: 13px;
+}
+
+/* ---------- Throughput ---------- */
+
+.rates {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.rate {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: var(--bg-raised);
+}
+
+.rate__label {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.rate__value {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.rate__value small {
+  font-size: 12px;
+  color: var(--fg-faint);
+  font-weight: 400;
+  margin-left: 3px;
+}
+
+/* An absent measurement says so in words. A grey dash is not a rate. */
+.rate__value.is-absent {
+  font-size: 14px;
+  color: var(--fg-faint);
+  font-weight: 400;
+}
+
+.rate--download .rate__value {
+  color: var(--download);
+}
+
+.rate--upload .rate__value {
+  color: var(--upload);
+}
+
+.rate--dns .rate__value {
+  color: var(--latency);
+}
+
+/* ---------- Detail panel ---------- */
+
+.detail__title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.detail__target {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--fg-faint);
+  margin-bottom: 14px;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 7px 12px;
+  font-size: 13px;
+}
+
+.kv dt {
+  color: var(--fg-dim);
+}
+
+.kv dd {
+  margin: 0;
+  font-family: var(--mono);
+  text-align: right;
+}
+
+.meaning {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--fg-dim);
+}
+
+.empty {
+  color: var(--fg-faint);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ---------- Status bar ---------- */
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px var(--pad);
+  background: var(--bg-sunken);
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg-faint);
+}
+
+.status__spacer {
+  flex: 1;
+}
+
+.status__code[data-ok='false'] {
+  color: var(--latency);
+}
+
+.status button {
+  color: var(--fg-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.status button:hover {
+  color: var(--fg);
+}
+
+/* ---------- Raw payload drawer ----------
+   The desktop audience includes the people who will script this thing. Showing
+   the actual JSON is both a courtesy to them and the plainest proof that the
+   window is rendering real output. */
+
+.raw {
+  position: fixed;
+  inset: auto 0 0 0;
+  max-height: 55%;
+  background: var(--bg-sunken);
+  border-top: 1px solid var(--line-strong);
+  padding: 12px var(--pad);
+  overflow: auto;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--fg-dim);
+  white-space: pre;
+  user-select: text;
+}
+
+.raw[hidden] {
+  display: none;
+}
