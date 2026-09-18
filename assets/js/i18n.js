@@ -48,6 +48,10 @@ const I18n = (() => {
       verdictLocal: 'The problem is inside your home network',
       verdictLocalBody:
         'Your own router is already slow to answer, and every segment beyond it inherits that delay. Moving closer to the router, changing channel, or restarting it is where to start. Your provider is not the cause.',
+      verdictGatewaySilent: 'Your router did not answer, and that is probably fine',
+      verdictGatewaySilentBody:
+        'Nothing came back from your router on any port tried, yet every segment beyond it answered normally — so it is forwarding your traffic and doing its job. Many routers simply ignore probes like these. Worth knowing, not worth fixing.',
+      noReply: 'no reply on ports 80, 443 and 53',
       verdictInternational: 'Your home and your provider are fine',
       verdictInternationalBody:
         'The first two segments are healthy; only the long-haul international link is congested. Local sites should feel normal while overseas ones feel slow. There is nothing to fix on your side.',
@@ -69,6 +73,7 @@ const I18n = (() => {
       scenarioHealthy: 'Healthy',
       scenarioLocal: 'Home network fault',
       scenarioIntl: 'International congestion',
+      scenarioGatewaySilent: 'Router not answering',
 
       // desktop.html
       desktopSubtitle: 'Desktop app preview',
@@ -228,6 +233,10 @@ const I18n = (() => {
       verdictLocal: '問題出在你家中的網路',
       verdictLocalBody:
         '你自己的路由器回應就已經很慢，後面每一段都繼承了這個延遲。可先嘗試靠近路由器、更換頻道或重新啟動。這與你的網路業者無關。',
+      verdictGatewaySilent: '網關沒有回應，但這多半沒問題',
+      verdictGatewaySilentBody:
+        '所有嘗試的埠都沒有從你的路由器收到回應，但它後面每一段都正常——代表它有在轉發流量，工作正常。許多路由器就是不回應這類探測。這件事值得知道，但不需要處理。',
+      noReply: '80、443、53 埠皆無回應',
       verdictInternational: '你家中與電信業者都正常',
       verdictInternationalBody:
         '前兩段皆健康，僅國際線路壅塞。連本地網站應該順暢，連國外網站則會變慢。你這端沒有需要處理的問題。',
@@ -249,6 +258,7 @@ const I18n = (() => {
       scenarioHealthy: '連線正常',
       scenarioLocal: '家中網路異常',
       scenarioIntl: '國際頻寬壅塞',
+      scenarioGatewaySilent: '網關無回應',
 
       // desktop.html
       desktopSubtitle: '桌面應用展示',

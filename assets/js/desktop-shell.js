@@ -209,12 +209,20 @@ const DesktopShell = (() => {
 
         const value = document.createElement('span');
         value.className = 'layer__value numeric';
-        value.textContent = `${layer.latency.toFixed(2)} ms`;
 
         const detail = document.createElement('span');
         detail.className = 'layer__detail';
-        detail.textContent =
-          `${I18n.t('jitter')} ${layer.jitter.toFixed(2)} ms · ${I18n.t('loss')} ${layer.loss}%`;
+
+        if (layer.ok === false) {
+          // No answer means no figure to print; zero would read as instant.
+          value.textContent = I18n.t('unreachable');
+          value.classList.remove('numeric');
+          detail.textContent = I18n.t('noReply');
+        } else {
+          value.textContent = `${layer.latency.toFixed(2)} ms`;
+          detail.textContent =
+            `${I18n.t('jitter')} ${layer.jitter.toFixed(2)} ms · ${I18n.t('loss')} ${layer.loss}%`;
+        }
 
         row.append(name, target, value, detail);
         el.layers.append(row);
@@ -246,7 +254,7 @@ const DesktopShell = (() => {
     function render(report) {
       el.sumDownload.textContent = report.download.toFixed(1);
       el.sumUpload.textContent = report.upload.toFixed(1);
-      el.sumLatency.textContent = report.layers[2].latency.toFixed(0);
+      el.sumLatency.textContent = report.layers[2].ok ? report.layers[2].latency.toFixed(0) : '--';
 
       const grade = FakeData.grade(report.download);
       el.sumGrade.textContent = I18n.t(`grade${grade[0].toUpperCase()}${grade.slice(1)}`);
@@ -287,7 +295,7 @@ const DesktopShell = (() => {
       const report = FakeData.report(forced);
       last = report;
 
-      await animate(PHASES[0], report.layers[2].latency, 'ms', 300);
+      await animate(PHASES[0], report.layers[2].ok ? report.layers[2].latency : 0, 'ms', 300);
       await wait(150);
       await animate(PHASES[1], report.download, 'Mbps', 150);
       await wait(150);

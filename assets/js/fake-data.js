@@ -28,14 +28,15 @@ const FakeData = (() => {
   }
 
   /*
-   * The three situations the tool exists to tell apart. A preview that only
-   * ever shows a healthy connection demonstrates nothing: the point of layered
-   * diagnostics is what it says when something is wrong.
+   * The situations the tool exists to tell apart. A preview that only ever
+   * shows a healthy connection demonstrates nothing: the point of layered
+   * diagnostics is what it says when something is wrong — and what it says when
+   * something merely looks wrong.
    */
   const SCENARIOS = {
     healthy: {
       id: 'healthy',
-      weight: 0.5,
+      weight: 0.45,
       verdict: 'verdictHealthy',
       severity: 'ok',
       layers: {
@@ -48,7 +49,7 @@ const FakeData = (() => {
 
     localFault: {
       id: 'localFault',
-      weight: 0.25,
+      weight: 0.2,
       verdict: 'verdictLocal',
       severity: 'bad',
       // The fault is inside the home: the first hop already stumbles, and
@@ -61,9 +62,26 @@ const FakeData = (() => {
       throughput: { download: [4, 22], upload: [1, 6] },
     },
 
+    gatewaySilent: {
+      id: 'gatewaySilent',
+      weight: 0.15,
+      verdict: 'verdictGatewaySilent',
+      severity: 'warn',
+      // The router answers nothing on any port the tool tries, yet everything
+      // beyond it is healthy — which is the point. A silent gateway is not a
+      // broken one: plenty of routers simply refuse probes while forwarding
+      // traffic perfectly.
+      layers: {
+        gateway: { unreachable: true, status: 'bad' },
+        regional: { latency: [16, 42], jitter: [0.2, 2], loss: 0, status: 'ok' },
+        international: { latency: [48, 95], jitter: [0.3, 3], loss: 0, status: 'ok' },
+      },
+      throughput: { download: [80, 120], upload: [20, 40] },
+    },
+
     internationalFault: {
       id: 'internationalFault',
-      weight: 0.25,
+      weight: 0.2,
       verdict: 'verdictInternational',
       severity: 'warn',
       // Home and ISP are healthy; only the long haul is congested. This is the
@@ -83,9 +101,15 @@ const FakeData = (() => {
   }
 
   function buildLayer(kind, spec, target) {
+    // A layer that never answered has no round-trip time to report. Reporting
+    // zero would read as instantaneous, which is the opposite of what happened.
+    if (spec.unreachable) {
+      return { kind, target, ok: false, latency: null, jitter: null, loss: 100, status: spec.status };
+    }
     return {
       kind,
       target,
+      ok: true,
       latency: resolveRange(spec.latency, 2),
       jitter: resolveRange(spec.jitter, 2),
       loss: resolveRange(spec.loss, 0),
@@ -120,6 +144,9 @@ const FakeData = (() => {
     // ranges overlap at their edges, and one unlucky draw would print a
     // physically impossible result.
     for (let i = 1; i < layers.length; i += 1) {
+      // An unreachable layer has nothing to compare against, and the one after
+      // it is not required to be slower than a measurement that never happened.
+      if (!layers[i].ok || !layers[i - 1].ok) continue;
       if (layers[i].latency <= layers[i - 1].latency) {
         layers[i].latency = Math.round((layers[i - 1].latency + between(1, 8)) * 100) / 100;
       }
@@ -132,8 +159,8 @@ const FakeData = (() => {
       layers,
       download: between(scenario.throughput.download[0], scenario.throughput.download[1]),
       upload: between(scenario.throughput.upload[0], scenario.throughput.upload[1]),
-      latency: layers[2].latency,
-      jitter: layers[2].jitter,
+      latency: layers[2].ok ? layers[2].latency : null,
+      jitter: layers[2].ok ? layers[2].jitter : null,
       dns: between(4, 40),
     };
   }

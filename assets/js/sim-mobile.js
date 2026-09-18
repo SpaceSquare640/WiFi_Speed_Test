@@ -139,14 +139,23 @@
 
       const value = document.createElement('span');
       value.className = 'layer__value numeric';
-      value.textContent = `${layer.latency.toFixed(2)} ms`;
 
       const detail = document.createElement('span');
       detail.className = 'layer__detail';
-      // Status is never carried by colour alone; the words repeat it.
-      detail.textContent =
-        `${I18n.t('jitter')} ${layer.jitter.toFixed(2)} ms · ` +
-        `${I18n.t('loss')} ${layer.loss}%`;
+
+      if (layer.ok === false) {
+        // A layer that never answered has no figure. Printing 0.00 ms would
+        // read as instantaneous, which is the opposite of what happened.
+        value.textContent = I18n.t('unreachable');
+        value.classList.remove('numeric');
+        detail.textContent = I18n.t('noReply');
+      } else {
+        value.textContent = `${layer.latency.toFixed(2)} ms`;
+        // Status is never carried by colour alone; the words repeat it.
+        detail.textContent =
+          `${I18n.t('jitter')} ${layer.jitter.toFixed(2)} ms · ` +
+          `${I18n.t('loss')} ${layer.loss}%`;
+      }
 
       row.append(name, target, value, detail);
       el.layers.append(row);
@@ -162,7 +171,7 @@
   function renderResults(report) {
     el.download.textContent = report.download.toFixed(1);
     el.upload.textContent = report.upload.toFixed(1);
-    el.latency.textContent = report.layers[2].latency.toFixed(0);
+    el.latency.textContent = report.layers[2].ok ? report.layers[2].latency.toFixed(0) : '--';
 
     const gradeKey = `grade${FakeData.grade(report.download).replace(/^./, (c) => c.toUpperCase())}`;
     el.grade.textContent = `${I18n.t('grade')}: ${I18n.t(gradeKey)}`;
@@ -187,7 +196,7 @@
     const report = FakeData.report(forcedScenario);
     lastReport = report;
 
-    await animatePhase(PHASES[0], report.layers[2].latency, 'ms', 300);
+    await animatePhase(PHASES[0], report.layers[2].ok ? report.layers[2].latency : 0, 'ms', 300);
     await wait(180);
     await animatePhase(PHASES[1], report.download, 'Mbps', 150);
     await wait(180);
