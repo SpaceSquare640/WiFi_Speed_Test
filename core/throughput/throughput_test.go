@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -17,14 +18,36 @@ import (
 // enough to move a great many bytes, which is all these tests need.
 const testWindow = 300 * time.Millisecond
 
+// headerRecorder captures a request header from inside the server.
+//
+// The handler runs once per connection and the default is several of them at a
+// time, so an unguarded field here is a genuine race — one the single-stream
+// default used to hide.
+type headerRecorder struct {
+	mu    sync.Mutex
+	value string
+}
+
+func (h *headerRecorder) set(v string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.value = v
+}
+
+func (h *headerRecorder) get() string {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return h.value
+}
+
 // downloadServer serves a fixed block repeatedly and records what it was asked
 // for, so a test can check the request as well as the result.
-func downloadServer(t *testing.T, seen *string) *httptest.Server {
+func downloadServer(t *testing.T, seen *headerRecorder) *httptest.Server {
 	t.Helper()
 	block := make([]byte, 512<<10)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if seen != nil {
-			*seen = r.Header.Get("Accept-Encoding")
+			seen.set(r.Header.Get("Accept-Encoding"))
 		}
 		w.Header().Set("Content-Type", "application/octet-stream")
 		_, _ = w.Write(block)
@@ -54,7 +77,7 @@ func TestMeasureWithoutEndpoints(t *testing.T) {
 }
 
 func TestMeasureDownload(t *testing.T) {
-	var accepted string
+	var accepted headerRecorder
 	srv := downloadServer(t, &accepted)
 
 	res := Measure(context.Background(), Options{
@@ -77,8 +100,8 @@ func TestMeasureDownload(t *testing.T) {
 	}
 	// Counting decompressed bytes would report a rate the link never carried,
 	// so the request has to ask for none.
-	if accepted != "identity" {
-		t.Errorf("Accept-Encoding = %q, want \"identity\"", accepted)
+	if got := accepted.get(); got != "identity" {
+		t.Errorf("Accept-Encoding = %q, want \"identity\"", got)
 	}
 }
 
