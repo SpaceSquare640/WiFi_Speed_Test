@@ -321,6 +321,8 @@ Files:
   --config <path>         configuration file
   --history <path>        history file
   --no-history            do not record this run
+                          (set WIFITEST_DEBUG_ARGS=1 to dump the raw
+                          command line, for platforms that rewrite it)
   --webhook <url>         webhook to notify; prefer ` + webhookEnvName + `,
                           since a command line lands in shell history
 

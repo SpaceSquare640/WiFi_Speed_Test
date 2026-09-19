@@ -2,23 +2,48 @@ package cli
 
 import (
 	"errors"
+	"io/fs"
 	"reflect"
 	"testing"
+	"time"
 )
 
-// The correction only ever fires on one platform, so these tests stand in for
-// the device: they describe the argument vector Termux's loader produces and
-// assert that the flags survive it.
-func TestNormaliseArgs(t *testing.T) {
-	const exe = "/data/data/com.termux/files/home/wt/wifitest"
+// fakeInfo describes a file without needing one. A real temporary file would
+// make these tests pass only where an execute bit means something, which is
+// not Windows, and the correction has to be reasoned about everywhere.
+type fakeInfo struct{ mode fs.FileMode }
 
-	// Two paths name the same file when either is this program. Nothing here
-	// touches the disk; the identity is the thing being described.
-	same := func(a, b string) bool {
-		names := map[string]bool{exe: true, "./wifitest": true, "wifitest": true}
-		return names[a] && names[b]
+func (f fakeInfo) Name() string       { return "" }
+func (f fakeInfo) Size() int64        { return 0 }
+func (f fakeInfo) Mode() fs.FileMode  { return f.mode }
+func (f fakeInfo) ModTime() time.Time { return time.Time{} }
+func (f fakeInfo) IsDir() bool        { return f.mode.IsDir() }
+func (f fakeInfo) Sys() any           { return nil }
+
+// statter answers for a fixed set of paths and reports every other one missing.
+func statter(files map[string]fs.FileMode) func(string) (fs.FileInfo, error) {
+	return func(name string) (fs.FileInfo, error) {
+		mode, ok := files[name]
+		if !ok {
+			return nil, errors.New("no such file")
+		}
+		return fakeInfo{mode: mode}, nil
 	}
-	found := func() (string, error) { return exe, nil }
+}
+
+// The correction only ever fires on one platform, so these stand in for the
+// device: they describe the argument vector a loader produces and assert that
+// the flags survive it.
+func TestNormaliseArgs(t *testing.T) {
+	const prog = "/data/data/com.termux/files/home/wt/wifitest"
+
+	files := statter(map[string]fs.FileMode{
+		prog:            0o700,
+		"./wifitest":    0o700,
+		"/etc/hosts":    0o644,
+		"/var/log":      fs.ModeDir | 0o755,
+		"/usr/bin/true": 0o755,
+	})
 
 	tests := []struct {
 		name string
@@ -31,23 +56,39 @@ func TestNormaliseArgs(t *testing.T) {
 			want: []string{"--json", "--no-history"},
 		},
 		{
-			// What Termux's loader hands over: the linker first, this program
-			// second, and the flags only after that.
-			name: "run through the loader",
-			argv: []string{"/system/bin/linker64", exe, "--json", "--no-history"},
+			// What the loader hands over: the program's path in front of the
+			// arguments the user actually typed.
+			name: "run through a loader",
+			argv: []string{"anything at all", prog, "--json", "--no-history"},
 			want: []string{"--json", "--no-history"},
 		},
 		{
-			name: "run through the loader with no flags",
-			argv: []string{"/system/bin/linker64", exe},
+			name: "run through a loader with no flags",
+			argv: []string{"anything at all", prog},
 			want: []string{},
 		},
 		{
-			// A path that is not this program is a genuine stray argument and
-			// must still reach the parser, which rejects it.
-			name: "a stray argument is left alone",
+			// A path to something that is not executable was a mistake, and the
+			// parser reporting it is more use than this quietly eating it.
+			name: "a readable file is still a mistake",
 			argv: []string{"./wifitest", "/etc/hosts"},
 			want: []string{"/etc/hosts"},
+		},
+		{
+			name: "a directory is still a mistake",
+			argv: []string{"./wifitest", "/var/log"},
+			want: []string{"/var/log"},
+		},
+		{
+			name: "a path that does not exist is still a mistake",
+			argv: []string{"./wifitest", "/no/such/thing"},
+			want: []string{"/no/such/thing"},
+		},
+		{
+			// A flag is never a loader's doing, whatever the filesystem says.
+			name: "a flag is never skipped",
+			argv: []string{"./wifitest", "--json"},
+			want: []string{"--json"},
 		},
 		{
 			name: "no arguments at all",
@@ -58,7 +99,7 @@ func TestNormaliseArgs(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := normaliseArgs(tc.argv, found, same)
+			got := normaliseArgs(tc.argv, files)
 			if len(got) == 0 && len(tc.want) == 0 {
 				return
 			}
@@ -69,25 +110,12 @@ func TestNormaliseArgs(t *testing.T) {
 	}
 }
 
-// Guessing would be worse than not correcting: the ordinary reading is right
-// everywhere the correction is not needed, which is every platform but one.
-func TestNormaliseArgsWithoutKnowingItsOwnPath(t *testing.T) {
-	missing := func() (string, error) { return "", errors.New("no /proc/self/exe") }
-	never := func(a, b string) bool { return false }
-
-	got := normaliseArgs([]string{"./wifitest", "--json"}, missing, never)
-	if !reflect.DeepEqual(got, []string{"--json"}) {
-		t.Errorf("normaliseArgs = %q, want [--json]", got)
-	}
-}
-
-// The real comparison must agree with itself, or the correction would fire on
-// every ordinary run and eat the first flag.
-func TestSameFileRecognisesOneFile(t *testing.T) {
-	if !sameFile(".", ".") {
-		t.Error("sameFile says the working directory is not itself")
-	}
-	if sameFile(".", "no-such-path-here") {
-		t.Error("sameFile matched a path that does not exist")
+// The real stat must agree that an ordinary flag is not a file, or the
+// correction would eat the first flag of every run everywhere.
+func TestNamesAnExecutableRejectsFlags(t *testing.T) {
+	for _, arg := range []string{"--json", "-v", "", "-"} {
+		if namesAnExecutable(arg, statter(map[string]fs.FileMode{arg: 0o700})) {
+			t.Errorf("%q was treated as a path left by a loader", arg)
+		}
 	}
 }
