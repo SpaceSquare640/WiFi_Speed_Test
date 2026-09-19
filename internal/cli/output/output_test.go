@@ -3,6 +3,7 @@ package output
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -208,5 +209,69 @@ func TestTranslatorFallsBackToEnglish(t *testing.T) {
 		if got := newTranslator(tag).t("download"); got != "下載" {
 			t.Errorf("newTranslator(%q) = %q, want the Chinese text", tag, got)
 		}
+	}
+}
+
+// A platform that never had a resolver configuration has not failed at
+// measuring one. These two rows exist so Android does not read as a broken
+// host, and they only appear there — which is a platform this suite cannot run
+// on, so the rendering is pinned here instead.
+func TestHumanSeparatesUnsupportedFromFailed(t *testing.T) {
+	var buf bytes.Buffer
+	r := sampleReport()
+	r.RegionalUnsupported = true
+	r.DNS = dns.Result{Host: "example.com", Err: dns.ErrUnsupported}
+
+	if err := NewHuman(Options{Out: &buf}).Write(r, history.Trend{}); err != nil {
+		t.Fatal(err)
+	}
+	out := buf.String()
+
+	if !strings.Contains(out, "not supported on this platform") {
+		t.Errorf("an unsupported measurement must say so rather than vanish:\n%s", out)
+	}
+	// "unreachable" is a fault. Reporting one where none exists would send the
+	// user hunting a problem with their network.
+	for _, line := range strings.Split(out, "\n") {
+		if strings.Contains(line, "DNS") && strings.Contains(line, "unreachable") {
+			t.Errorf("an unsupported platform must not be reported as unreachable:\n%s", line)
+		}
+	}
+	if !strings.Contains(out, "never attempted") {
+		t.Errorf("the missing regional row must explain itself:\n%s", out)
+	}
+	// It is a fact about the platform, not a warning, so it must not be shouted.
+	var painted bytes.Buffer
+	_ = NewHuman(Options{Out: &painted, Color: true}).Write(r, history.Trend{})
+	if strings.Contains(painted.String(), ansiRed+"- no regional egress row") {
+		t.Error("an unsupported layer must not be coloured as a failure")
+	}
+}
+
+// The reasons individual endpoints gave were collected all along and only the
+// machine format printed them, which left "every endpoint failed" as the whole
+// of what a person was told.
+func TestHumanNamesWhyEachEndpointFailed(t *testing.T) {
+	var buf bytes.Buffer
+	r := sampleReport()
+	r.Download = throughput.Result{
+		Direction: throughput.DirectionDownload,
+		Samples: []throughput.Sample{
+			{Endpoint: "https://example.com/down", Err: errors.New("the endpoint answered 429 Too Many Requests")},
+		},
+		Err: throughput.ErrAllEndpointsFailed,
+	}
+	r.Errors = []string{"download: " + throughput.ErrAllEndpointsFailed.Error()}
+
+	if err := NewHuman(Options{Out: &buf}).Write(r, history.Trend{}); err != nil {
+		t.Fatal(err)
+	}
+	out := buf.String()
+
+	if !strings.Contains(out, "429 Too Many Requests") {
+		t.Errorf("the reason must reach the person, not only the JSON:\n%s", out)
+	}
+	if !strings.Contains(out, "https://example.com/down") {
+		t.Errorf("the reason must say which endpoint gave it:\n%s", out)
 	}
 }
