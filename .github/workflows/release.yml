@@ -82,13 +82,22 @@ jobs:
   desktop:
     name: Desktop ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
+    # Marked per platform rather than on the job as a whole. A genuine break on
+    # Windows, Linux or Apple Silicon must still stop a release; only the Intel
+    # macOS image is optional, because those runners are being retired and are
+    # scarce enough that waiting on one can hold up everything else.
+    #
+    # Note what this does not fix: a job that never gets a runner is queued, not
+    # failed, so it still blocks. If that happens, drop macos-13 from the matrix
+    # rather than waiting it out.
+    continue-on-error: ${{ matrix.optional == true }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - { os: windows-latest, label: windows, triple: x86_64-pc-windows-msvc, ext: '.exe' }
           - { os: macos-latest, label: macos-arm64, triple: aarch64-apple-darwin, ext: '' }
-          - { os: macos-13, label: macos-intel, triple: x86_64-apple-darwin, ext: '' }
+          - { os: macos-13, label: macos-intel, triple: x86_64-apple-darwin, ext: '', optional: true }
           - { os: ubuntu-22.04, label: linux, triple: x86_64-unknown-linux-gnu, ext: '' }
     steps:
       - uses: actions/checkout@v4
@@ -169,6 +178,9 @@ jobs:
     name: Publish
     needs: [cli, desktop]
     runs-on: ubuntu-latest
+    # A leg marked continue-on-error reports success to its dependents even
+    # when it failed, so an absent Intel build does not skip this job — while a
+    # genuine failure on a required platform still does, which is the point.
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/download-artifact@v4
