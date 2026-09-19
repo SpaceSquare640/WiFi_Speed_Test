@@ -22,6 +22,11 @@ const (
 // between a few seconds and a minute.
 const quickSamples = 1
 
+// maxStreams bounds --streams. Beyond a handful the extra connections stop
+// revealing anything about the link and start describing what the endpoint
+// tolerates.
+const maxStreams = 16
+
 // Flags is the parsed command line.
 type Flags struct {
 	Mode     Mode
@@ -43,6 +48,7 @@ type Flags struct {
 	Layer3    string
 
 	Servers int
+	Streams int
 	Timeout time.Duration
 	Retries int
 	ICMP    bool
@@ -107,6 +113,7 @@ func Parse(args []string) (Flags, error) {
 	fs.StringVar(&f.Layer3, "layer3", "", "override the international target")
 
 	fs.IntVar(&f.Servers, "servers", 0, "how many endpoints contribute to the mean")
+	fs.IntVar(&f.Streams, "streams", 0, "parallel connections per throughput endpoint")
 	fs.DurationVar(&f.Timeout, "timeout", 0, "per-measurement timeout")
 	fs.IntVar(&f.Retries, "retries", -1, "retry attempts per measurement")
 	fs.BoolVar(&f.ICMP, "icmp", false, "probe with ICMP instead of TCP (may need elevation)")
@@ -169,6 +176,13 @@ func (f Flags) Validate() error {
 	}
 	if f.Given("servers") && f.Servers < 1 {
 		return errors.New("--servers must be at least 1")
+	}
+	// Capped as well as floored. Parallel connections are a measurement
+	// technique, not a throttle to open at will: a large number aimed at
+	// someone else's server is indistinguishable from an attempt to flood it,
+	// and this tool has no business shipping that as a one-word flag.
+	if f.Given("streams") && (f.Streams < 1 || f.Streams > maxStreams) {
+		return fmt.Errorf("--streams must be between 1 and %d", maxStreams)
 	}
 	if f.Given("timeout") && f.Timeout <= 0 {
 		return errors.New("--timeout must be positive")

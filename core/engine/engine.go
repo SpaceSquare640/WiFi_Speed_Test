@@ -9,8 +9,10 @@ package engine
 import (
 	"context"
 	"errors"
+	"net/url"
 	"os"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/SpaceSquare640/WiFi_Speed_Test/core/dns"
@@ -79,10 +81,14 @@ type Options struct {
 	LayerOverrides layers.Overrides
 	Endpoints      []throughput.Endpoint
 	Samples        int
-	Timeout        time.Duration
-	Retries        int
-	LatencyMethod  latency.Method
-	DNSProbeHost   string
+
+	// Streams is how many connections each throughput endpoint is measured
+	// over. One describes a single connection; more describe several.
+	Streams       int
+	Timeout       time.Duration
+	Retries       int
+	LatencyMethod latency.Method
+	DNSProbeHost  string
 }
 
 // Defaults applied to a zero-valued Options.
@@ -156,6 +162,7 @@ func (e *Engine) Run(ctx context.Context) (Report, error) {
 		e.runLayers(ctx, &report)
 	}
 	e.runDNS(ctx, &report)
+	e.runLatency(ctx, &report)
 	e.runThroughput(ctx, &report)
 
 	// A grade is a judgement about a measurement. Without the measurement there
@@ -236,21 +243,89 @@ func (e *Engine) runThroughput(ctx context.Context, report *Report) {
 	}
 }
 
-func (e *Engine) measureThroughput(ctx context.Context, direction throughput.Direction) throughput.Result {
-	endpoints := e.opts.Endpoints
-	if len(endpoints) == 0 {
-		endpoints = throughput.BuiltinEndpoints()
+// endpoints returns the targets for this pass. A user-supplied list replaces
+// the built-in one outright rather than extending it.
+func (e *Engine) endpoints() []throughput.Endpoint {
+	if len(e.opts.Endpoints) > 0 {
+		return e.opts.Endpoints
 	}
+	return throughput.BuiltinEndpoints()
+}
+
+// runLatency times the handshake to a throughput endpoint.
+//
+// This figure is distinct from the per-layer ones: the layers describe segments
+// of the path, while this describes the host the throughput figures came from,
+// so a slow transfer can be read against the distance it travelled.
+//
+// It runs before the transfer, never after. A link still draining a throughput
+// test would report a latency that describes the test rather than the link.
+func (e *Engine) runLatency(ctx context.Context, report *Report) {
+	// Both directions skipped means the endpoints are not being touched at all,
+	// and timing one would be traffic the user declined.
+	if e.opts.SkipDownload && e.opts.SkipUpload {
+		return
+	}
+	target, ports, ok := probeTarget(e.endpoints())
+	if !ok {
+		return
+	}
+
+	report.Latency = latency.Measure(ctx, target, latency.Options{
+		Method:  e.opts.LatencyMethod,
+		Count:   LatencyProbes,
+		Timeout: e.opts.Timeout,
+		Ports:   ports,
+	})
+	if report.Latency.Err != nil {
+		report.Errors = append(report.Errors, "latency: "+report.Latency.Err.Error())
+	}
+}
+
+// probeTarget picks the host to time, and the port to reach it on, from the
+// first endpoint that names one.
+func probeTarget(endpoints []throughput.Endpoint) (string, []int, bool) {
+	for _, endpoint := range endpoints {
+		raw := endpoint.DownloadURL
+		if raw == "" {
+			raw = endpoint.UploadURL
+		}
+		if raw == "" {
+			continue
+		}
+		parsed, err := url.Parse(raw)
+		if err != nil || parsed.Hostname() == "" {
+			continue
+		}
+		// The scheme's default, unless the URL names a port of its own.
+		port := 443
+		if parsed.Scheme == "http" {
+			port = 80
+		}
+		if explicit := parsed.Port(); explicit != "" {
+			if n, err := strconv.Atoi(explicit); err == nil {
+				port = n
+			}
+		}
+		return parsed.Hostname(), []int{port}, true
+	}
+	return "", nil, false
+}
+
+func (e *Engine) measureThroughput(ctx context.Context, direction throughput.Direction) throughput.Result {
+	endpoints := e.endpoints()
 	return retry(ctx, e.opts.Retries, func() (throughput.Result, bool) {
 		r := throughput.Measure(ctx, throughput.Options{
 			Direction: direction,
 			Endpoints: endpoints,
 			Samples:   e.opts.Samples,
+			Streams:   e.opts.Streams,
 			Timeout:   e.opts.Timeout,
 		})
-		// Retrying a missing endpoint list or an unbuilt feature would waste
-		// the user's time on an outcome that cannot change.
-		permanent := errors.Is(r.Err, throughput.ErrNoEndpoints) || errors.Is(r.Err, throughput.ErrNotImplemented)
+		// An endpoint list that is empty will still be empty on the second
+		// attempt, so retrying only spends the backoff. Every other failure is
+		// the sort a retry exists for.
+		permanent := errors.Is(r.Err, throughput.ErrNoEndpoints)
 		return r, r.OK || permanent
 	})
 }

@@ -28,6 +28,7 @@ const (
 	DefaultTimeout  = 10 * time.Second
 	DefaultRetries  = 3
 	DefaultSamples  = 3
+	DefaultStreams  = 1
 )
 
 // Config is the resolved configuration for a run.
@@ -41,6 +42,7 @@ type Config struct {
 	Timeout  time.Duration
 	Retries  int
 	Samples  int
+	Streams  int
 
 	// WebhookURL is a credential. It is read from the configuration file or the
 	// environment and is never written to source or to version control. The
@@ -67,6 +69,7 @@ type file struct {
 	Timeout  string `json:"timeout,omitempty"`
 	Retries  *int   `json:"retries,omitempty"`
 	Samples  *int   `json:"samples,omitempty"`
+	Streams  *int   `json:"streams,omitempty"`
 
 	WebhookURL string `json:"webhook_url,omitempty"`
 
@@ -84,6 +87,7 @@ func Defaults() Config {
 		Timeout:  DefaultTimeout,
 		Retries:  DefaultRetries,
 		Samples:  DefaultSamples,
+		Streams:  DefaultStreams,
 		Language: DefaultLanguage,
 	}
 }
@@ -184,6 +188,9 @@ func (f file) merge(cfg *Config) error {
 	}
 	if f.Samples != nil {
 		cfg.Samples = *f.Samples
+	}
+	if f.Streams != nil {
+		cfg.Streams = *f.Streams
 	}
 	if f.WebhookURL != "" {
 		cfg.WebhookURL = f.WebhookURL

@@ -145,6 +145,9 @@ func merge(cfg config.Config, f Flags) config.Config {
 	if f.Given("servers") {
 		cfg.Samples = f.Servers
 	}
+	if f.Given("streams") {
+		cfg.Streams = f.Streams
+	}
 	if f.WebhookURL != "" {
 		cfg.WebhookURL = f.WebhookURL
 	}
@@ -174,6 +177,7 @@ func engineOptions(cfg config.Config, f Flags) engine.Options {
 			International:  cfg.Layer3,
 		},
 		Samples: cfg.Samples,
+		Streams: cfg.Streams,
 		Timeout: cfg.Timeout,
 		Retries: cfg.Retries,
 	}
@@ -293,6 +297,7 @@ Targets:
 
 Measurement:
   --servers <n>           endpoints contributing to the mean
+  --streams <n>           parallel connections per endpoint (default 1)
   --timeout <duration>    per-measurement timeout
   --retries <n>           retry attempts per measurement
   --icmp                  probe with ICMP rather than TCP (may need elevation)

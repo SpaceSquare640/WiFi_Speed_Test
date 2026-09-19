@@ -85,6 +85,9 @@ func TestValidate(t *testing.T) {
 		"supported language":        {[]string{"--lang", "zh-TW"}, false},
 		"contradictory history":     {[]string{"--no-history", "--history", "x.jsonl"}, true},
 		"zero servers":              {[]string{"--servers", "0"}, true},
+		"zero streams":              {[]string{"--streams", "0"}, true},
+		"streams above the cap":     {[]string{"--streams", "64"}, true},
+		"streams within range":      {[]string{"--streams", "4"}, false},
 		"negative retries rejected": {[]string{"--retries", "-2"}, true},
 	}
 	for name, c := range cases {
