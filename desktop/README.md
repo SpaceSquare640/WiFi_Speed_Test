@@ -56,9 +56,10 @@ The path, left to right, in the order packets travel: your network, your
 provider, the wider internet. Selecting a segment shows its round-trip time,
 jitter, loss, the port that answered, and what a fault there would mean.
 
-Throughput reads `not measured` until the built-in endpoint list is filled,
-which is waiting on a terms-of-service review of each candidate. The layered
-diagnostics do not depend on it.
+Throughput reads `not measured` until an endpoint is named, with `--endpoint` or
+in the configuration file. The built-in list ships empty on purpose: a review of
+the public candidates cleared none of them for automated use at the rate this
+tool would call them. The layered diagnostics never depended on it.
 
 The status bar carries the schema version and the engine's exit code, and the
 raw payload is one click away — both because the audience includes people who

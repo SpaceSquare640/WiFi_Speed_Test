@@ -173,7 +173,7 @@ func downloadOnce(ctx context.Context, c *http.Client, url string) (int64, time.
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return 0, zero, zero, fmt.Errorf("throughput: %s answered %s", url, resp.Status)
+		return 0, zero, zero, fmt.Errorf("throughput: the endpoint answered %s", resp.Status)
 	}
 
 	// The clock starts once the headers are in, which is where the body begins.
@@ -217,7 +217,7 @@ func uploadOnce(ctx context.Context, c *http.Client, url string) (int64, time.Ti
 		return sent, started, ended, err
 	}
 	if resp != nil && (resp.StatusCode < 200 || resp.StatusCode >= 300) {
-		return sent, started, ended, fmt.Errorf("throughput: %s answered %s", url, resp.Status)
+		return sent, started, ended, fmt.Errorf("throughput: the endpoint answered %s", resp.Status)
 	}
 	return sent, started, ended, nil
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/SpaceSquare640/WiFi_Speed_Test/core/grade"
 	"github.com/SpaceSquare640/WiFi_Speed_Test/core/history"
 	"github.com/SpaceSquare640/WiFi_Speed_Test/core/layers"
+	"github.com/SpaceSquare640/WiFi_Speed_Test/core/throughput"
 )
 
 // ANSI colours. The semantics are shared with the other shells so that all
@@ -315,7 +316,24 @@ func (h *Human) writeProblems(b *strings.Builder, r engine.Report) {
 	for _, e := range r.Errors {
 		fmt.Fprintf(b, "  %s\n", h.paint("- "+e, ansiRed))
 	}
+	// "every endpoint failed" names no cause, and a diagnostic tool that
+	// cannot diagnose its own failure sends the user to the JSON output to
+	// find out what a 429 or a refused connection was. The reasons are
+	// already collected per endpoint; this prints them.
+	h.writeSampleFailures(b, r.Download.Samples)
+	h.writeSampleFailures(b, r.Upload.Samples)
 	b.WriteString("\n")
+}
+
+// writeSampleFailures lists why individual endpoints did not answer,
+// indented beneath the summary line that reported the direction failed.
+func (h *Human) writeSampleFailures(b *strings.Builder, samples []throughput.Sample) {
+	for _, sample := range samples {
+		if sample.Err == nil {
+			continue
+		}
+		fmt.Fprintf(b, "    %s\n", h.paint(sample.Endpoint+": "+sample.Err.Error(), ansiDim))
+	}
 }
 
 // paint applies a colour when colour is enabled.

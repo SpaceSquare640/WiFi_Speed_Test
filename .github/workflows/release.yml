@@ -207,8 +207,11 @@ jobs:
 
             **Desktop** — the same engine in a window, bundled as a sidecar.
 
-            Throughput measurement is not implemented yet: the built-in
-            endpoint list ships empty pending a terms-of-service review of each
-            candidate, so download and upload report `not measured`. The
-            layered diagnostics, latency, jitter, loss and DNS timing do not
-            depend on it and work today.
+            Throughput is measured against endpoints you name, with
+            `--endpoint` or in the configuration file. The built-in list ships
+            empty on purpose: a review of the public candidates cleared none of
+            them for automated use at the rate this tool would call them, and a
+            default nobody vetted is worse than no default at all. Without an
+            endpoint, download and upload report `not measured`; the layered
+            diagnostics, latency, jitter, loss and DNS timing never depended
+            on it.

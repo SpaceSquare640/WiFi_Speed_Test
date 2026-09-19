@@ -9,7 +9,7 @@ something is wrong.
 
 ## What it measures
 
-- Download and upload throughput, sampled across multiple endpoints
+- Download and upload throughput, averaged across the endpoints you supply
 - Latency, jitter and packet loss
 - DNS resolution time
 - **Layered diagnostics** — latency, jitter and loss are measured separately at
@@ -34,9 +34,13 @@ webhook you supply.
 account, no database, no sync and no telemetry. Results and history stay on your
 device.
 
-**You control where your traffic goes.** Default endpoints exist so the tool works
-out of the box, but every target — throughput endpoints and all three diagnostic
-layers — can be overridden. Nothing is reported to the project.
+**You control where your traffic goes.** Throughput is measured only against
+endpoints you name, with `--endpoint` or in the configuration file. The built-in
+list ships empty on purpose: a review of the public candidates cleared none of
+them for automated use at the rate this tool would call them, and a default
+nobody vetted is worse than no default at all. The first two diagnostic layers
+target your own gateway and resolver; only the third reaches off your network,
+to a documented and overridable default. Nothing is reported to the project.
 
 **Credentials never live in source.** Webhook URLs belong in your local
 configuration file, which is excluded from version control.
