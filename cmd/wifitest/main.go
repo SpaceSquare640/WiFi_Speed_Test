@@ -15,7 +15,9 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	code, err := cli.Run(ctx, os.Args[1:], os.Stdout, os.Stderr)
+	// Not os.Args[1:] — see cli.Args, which corrects for the loader Termux
+	// has to invoke this through.
+	code, err := cli.Run(ctx, cli.Args(), os.Stdout, os.Stderr)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}

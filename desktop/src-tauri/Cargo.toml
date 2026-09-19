@@ -1,6 +1,6 @@
 [package]
 name = "wifitest-desktop"
-version = "0.1.0"
+version = "0.1.1"
 description = "Network diagnostics that say which segment is at fault"
 authors = ["SpaceSquare"]
 edition = "2021"

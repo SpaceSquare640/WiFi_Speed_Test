@@ -49,11 +49,29 @@ configuration file, which is excluded from version control.
 
 | Platform | CLI | Desktop | Native app |
 | --- | --- | --- | --- |
-| Windows | planned | planned | — |
-| Linux | planned | planned | — |
-| macOS | planned | planned | — |
-| Android (Termux) | planned | — | — |
-| Android | — | — | planned |
+| Windows | amd64, arm64 | installer and MSI | — |
+| Linux | amd64, arm64 | deb, AppImage and RPM | — |
+| macOS (Apple Silicon) | arm64 | dmg | — |
+| macOS (Intel) | amd64 | not built | — |
+| Android (Termux) | arm64 | — | — |
+| Android (application) | — | — | planned |
+
+No Intel macOS bundle is built. Those runners are being retired and scarce
+enough that waiting on one holds up every other platform's release; the command
+line build for Intel Macs is unaffected, being cross-compiled like the rest.
+
+### On Termux
+
+Take `wifitest-android-arm64`, not `wifitest-linux-arm64`. Android refuses to
+execute a non-PIE binary, which is what the Linux build is, and Termux has to
+hand anything in its home directory to the system linker rather than exec it
+directly.
+
+```
+curl -fL -O https://github.com/SpaceSquare640/WiFi_Speed_Test/releases/latest/download/wifitest-android-arm64
+chmod +x wifitest-android-arm64
+./wifitest-android-arm64
+```
 
 ## Building
 
