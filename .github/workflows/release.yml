@@ -1,0 +1,202 @@
+# Packaging. Everything that produces a downloadable artefact happens here
+# rather than on anyone's machine, so a release is reproducible from a tag and
+# nothing depends on what happens to be installed locally.
+#
+# Push a tag to trigger it:
+#
+#     git tag v0.1.0 && git push origin v0.1.0
+#
+# The tag is the decision to release; this workflow is only the labour.
+
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build when run by hand (e.g. v0.1.0-test)'
+        required: true
+        default: 'v0.0.0-manual'
+
+permissions:
+  contents: write
+
+jobs:
+  # ------------------------------------------------------------------
+  # The command line tool: one static binary per platform, no runtime to
+  # install, which is the whole reason the engine is written in Go.
+  # ------------------------------------------------------------------
+  cli:
+    name: CLI ${{ matrix.goos }}/${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { goos: windows, goarch: amd64, ext: '.exe' }
+          - { goos: windows, goarch: arm64, ext: '.exe' }
+          - { goos: linux, goarch: amd64, ext: '' }
+          - { goos: linux, goarch: arm64, ext: '' }
+          - { goos: darwin, goarch: amd64, ext: '' }
+          - { goos: darwin, goarch: arm64, ext: '' }
+          - { goos: android, goarch: arm64, ext: '' }
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      # A manual run has no tag, so the branch name would otherwise end up
+      # baked into the binary as its version.
+      - name: Resolve version
+        id: version
+        run: echo "value=${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+        run: |
+          name="wifitest-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+          go build -trimpath \
+            -ldflags "-s -w -X github.com/SpaceSquare640/WiFi_Speed_Test/internal/cli.Version=${{ steps.version.outputs.value }}" \
+            -o "dist/$name" ./cmd/wifitest
+          ls -la dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cli-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+          retention-days: 7
+
+  # ------------------------------------------------------------------
+  # The desktop build. Each platform builds on its own runner because a
+  # Tauri bundle is made of that platform's native installer formats, and
+  # the sidecar must be the engine compiled for that same host.
+  # ------------------------------------------------------------------
+  desktop:
+    name: Desktop ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, label: windows, triple: x86_64-pc-windows-msvc, ext: '.exe' }
+          - { os: macos-latest, label: macos-arm64, triple: aarch64-apple-darwin, ext: '' }
+          - { os: macos-13, label: macos-intel, triple: x86_64-apple-darwin, ext: '' }
+          - { os: ubuntu-22.04, label: linux, triple: x86_64-unknown-linux-gnu, ext: '' }
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri -> target
+
+      # Tauri on Linux needs the system WebView and tray libraries; the other
+      # two platforms ship theirs.
+      - name: Linux dependencies
+        if: matrix.label == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev
+
+      # The sidecar has to carry the target triple in its name; that is how
+      # Tauri finds it. Building it here rather than committing it keeps one
+      # program from being stored twice in the repository.
+      - name: Build the engine as a sidecar
+        shell: bash
+        env:
+          CGO_ENABLED: '0'
+          VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+        run: |
+          go build -trimpath \
+            -ldflags "-s -w -X github.com/SpaceSquare640/WiFi_Speed_Test/internal/cli.Version=$VERSION" \
+            -o "desktop/src-tauri/binaries/wifitest-${{ matrix.triple }}${{ matrix.ext }}" \
+            ./cmd/wifitest
+          ls -la desktop/src-tauri/binaries/
+
+      - name: Install the Tauri CLI
+        run: cargo install tauri-cli --version "^2" --locked
+
+      - name: Build the bundle
+        working-directory: desktop/src-tauri
+        run: cargo tauri build
+
+      - name: Collect the installers
+        shell: bash
+        run: |
+          mkdir -p packaged
+          # The bundle layout differs per platform, so collect by extension
+          # rather than by guessing paths.
+          find desktop/src-tauri/target/release/bundle -type f \
+            \( -name '*.msi' -o -name '*.exe' -o -name '*.dmg' -o -name '*.app.tar.gz' \
+               -o -name '*.deb' -o -name '*.AppImage' -o -name '*.rpm' \) \
+            -exec cp {} packaged/ \;
+          ls -la packaged/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.label }}
+          path: packaged/*
+          retention-days: 7
+
+  # ------------------------------------------------------------------
+  # One release carrying everything the two jobs above produced.
+  # ------------------------------------------------------------------
+  release:
+    name: Publish
+    needs: [cli, desktop]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Flatten
+        run: |
+          mkdir -p release
+          find artifacts -type f -exec cp {} release/ \;
+          ls -la release/
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
+          body: |
+            Network diagnostics that report which segment of the path is at
+            fault, not only how fast the connection is.
+
+            **Command line** — one static binary per platform, nothing to
+            install alongside it. Run `wifitest`, or `wifitest --json` for
+            machine-readable output with a stable schema.
+
+            **Desktop** — the same engine in a window, bundled as a sidecar.
+
+            Throughput measurement is not implemented yet: the built-in
+            endpoint list ships empty pending a terms-of-service review of each
+            candidate, so download and upload report `not measured`. The
+            layered diagnostics, latency, jitter, loss and DNS timing do not
+            depend on it and work today.
