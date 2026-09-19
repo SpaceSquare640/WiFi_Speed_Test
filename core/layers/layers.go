@@ -53,6 +53,12 @@ type Set struct {
 	// international one. The result must say so, or the user will misread two
 	// identical rows as corroboration.
 	ResolverIsPublic bool
+
+	// RegionalUnsupported reports that the regional layer is missing because
+	// the platform has no resolver configuration to read, not because this host
+	// is misconfigured. Without it the row simply vanishes and the user is left
+	// to guess whether the layer failed or was never attempted.
+	RegionalUnsupported bool
 }
 
 // ProbePorts returns the TCP ports worth trying for this layer, in order.
@@ -121,6 +127,8 @@ func ResolveWith(p netinfo.Provider, o Overrides) (Set, error) {
 				break
 			}
 		}
+	} else if errors.Is(err, netinfo.ErrUnsupported) {
+		set.RegionalUnsupported = true
 	}
 
 	international := DefaultInternational

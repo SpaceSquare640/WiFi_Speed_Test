@@ -8,12 +8,25 @@
 // non-English Windows installations for exactly that reason.
 package netinfo
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 // ErrNotAvailable reports that the value could not be determined on this host.
 // Callers should degrade gracefully — a layer whose target is unknown is
 // skipped, never guessed.
 var ErrNotAvailable = errors.New("netinfo: value not available on this host")
+
+// ErrUnsupported reports that the platform cannot supply the value at all, as
+// distinct from a host that merely happens not to have it configured. The
+// difference matters to what the user is told: a missing value is worth
+// investigating, whereas a platform that never had one is not a fault and
+// should not be presented as a failed measurement.
+//
+// It wraps ErrNotAvailable so that callers testing for availability alone need
+// no change.
+var ErrUnsupported = fmt.Errorf("%w: not supported on this platform", ErrNotAvailable)
 
 // Provider exposes host network facts. It is an interface so that tests can
 // supply fixtures and so that each platform can register its own implementation.

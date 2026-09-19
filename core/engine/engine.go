@@ -59,6 +59,11 @@ type Report struct {
 	// onto the international one and the two rows are not independent evidence.
 	ResolverIsPublic bool
 
+	// RegionalUnsupported carries the other caveat: the regional row is absent
+	// because this platform keeps no resolver configuration, not because the
+	// layer was probed and failed.
+	RegionalUnsupported bool
+
 	// Errors collects failures that did not abort the pass. A partial report is
 	// more useful than none: a run that cannot reach the internet has still
 	// established that the gateway responds.
@@ -99,6 +104,15 @@ const (
 // ErrNoNetwork reports that nothing at all could be measured, which makes the
 // pass meaningless rather than merely partial.
 var ErrNoNetwork = errors.New("engine: no measurement succeeded; the host appears to have no network")
+
+// ErrICMPBlocked replaces ErrNoNetwork when the pass probed with ICMP.
+//
+// ICMP is filtered by far more networks and hosts than TCP is, so a run that
+// measures nothing under --icmp usually met a filter rather than a dead link —
+// the TCP probe would very likely have answered. The tool does not silently
+// retry over TCP, because a user who asked for ICMP is entitled to the ICMP
+// answer; it says what happened and what to run instead.
+var ErrICMPBlocked = errors.New("engine: nothing answered over ICMP, which is commonly blocked; rerun without --icmp to probe with TCP")
 
 // Engine runs diagnostic passes.
 type Engine struct {
@@ -153,6 +167,9 @@ func (e *Engine) Run(ctx context.Context) (Report, error) {
 	}
 
 	if !anySucceeded(report) {
+		if e.opts.LatencyMethod == latency.MethodICMP {
+			return report, ErrICMPBlocked
+		}
 		return report, ErrNoNetwork
 	}
 	return report, nil
@@ -166,6 +183,7 @@ func (e *Engine) runLayers(ctx context.Context, report *Report) {
 		return
 	}
 	report.ResolverIsPublic = set.ResolverIsPublic
+	report.RegionalUnsupported = set.RegionalUnsupported
 
 	for _, layer := range set.Layers {
 		if ctx.Err() != nil {
@@ -191,9 +209,13 @@ func (e *Engine) runLayers(ctx context.Context, report *Report) {
 func (e *Engine) runDNS(ctx context.Context, report *Report) {
 	report.DNS = retry(ctx, e.opts.Retries, func() (dns.Result, bool) {
 		r := dns.Measure(ctx, dns.Options{Host: e.opts.DNSProbeHost, Timeout: e.opts.Timeout})
-		return r, r.OK
+		// An unsupported platform will not have become supported by the second
+		// attempt, so retrying it only spends the backoff.
+		return r, r.OK || errors.Is(r.Err, dns.ErrUnsupported)
 	})
-	if report.DNS.Err != nil {
+	// A platform that cannot be measured has not failed, so it does not belong
+	// in the problem list; the renderer states it in its own row instead.
+	if report.DNS.Err != nil && !errors.Is(report.DNS.Err, dns.ErrUnsupported) {
 		report.Errors = append(report.Errors, "dns: "+report.DNS.Err.Error())
 	}
 }

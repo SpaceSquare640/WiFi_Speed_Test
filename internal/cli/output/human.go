@@ -1,9 +1,11 @@
 package output
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
+	"github.com/SpaceSquare640/WiFi_Speed_Test/core/dns"
 	"github.com/SpaceSquare640/WiFi_Speed_Test/core/engine"
 	"github.com/SpaceSquare640/WiFi_Speed_Test/core/grade"
 	"github.com/SpaceSquare640/WiFi_Speed_Test/core/history"
@@ -172,6 +174,11 @@ func (h *Human) writeLayers(b *strings.Builder, r engine.Report) {
 	if r.ResolverIsPublic {
 		fmt.Fprintf(b, "  %s\n", h.paint("! "+h.tr.t("resolverPublic"), ansiAmber))
 	}
+	// Dim rather than amber: a layer this platform never had is a fact
+	// about the platform, not a warning about the network.
+	if r.RegionalUnsupported {
+		fmt.Fprintf(b, "  %s\n", h.paint("- "+h.tr.t("regionalUnsupported"), ansiDim))
+	}
 	b.WriteString("\n")
 }
 
@@ -234,6 +241,12 @@ func (h *Human) layerName(k layers.Kind) string {
 
 func (h *Human) writeDNS(b *strings.Builder, r engine.Report) {
 	if r.DNS.Host == "" {
+		return
+	}
+	// An unsupported platform is not an unreachable resolver, and
+	// colouring it red would report a fault where there is none.
+	if errors.Is(r.DNS.Err, dns.ErrUnsupported) {
+		h.writeField(b, h.tr.t("dns"), h.paint(h.tr.t("unsupported"), ansiDim))
 		return
 	}
 	if !r.DNS.OK {

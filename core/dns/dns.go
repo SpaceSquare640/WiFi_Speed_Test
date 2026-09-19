@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"net"
+	"runtime"
 	"time"
 )
 
@@ -19,6 +20,18 @@ const DefaultHost = "example.com"
 
 // DefaultTimeout bounds one lookup.
 const DefaultTimeout = 5 * time.Second
+
+// ErrUnsupported reports that resolution time cannot be measured on this
+// platform.
+//
+// Android is the case in hand. It keeps no /etc/resolv.conf, and its real
+// resolver lives behind netd, reachable only through bionic — which a binary
+// built without cgo cannot call. Go's own resolver therefore falls back to
+// localhost, where nothing listens, and every lookup fails with a connection
+// refused that describes the fallback rather than the network. Reporting that
+// as a DNS fault would be worse than reporting nothing, so the measurement is
+// declined outright and said to be unsupported.
+var ErrUnsupported = errors.New("dns: resolution time cannot be measured on this platform")
 
 // Options configures a resolution measurement.
 type Options struct {
@@ -50,6 +63,11 @@ func Measure(ctx context.Context, o Options) Result {
 		o.Timeout = DefaultTimeout
 	}
 	res := Result{Host: o.Host}
+
+	if runtime.GOOS == "android" {
+		res.Err = ErrUnsupported
+		return res
+	}
 
 	// An address needs no resolving; reporting a near-zero time for it would
 	// describe nothing.

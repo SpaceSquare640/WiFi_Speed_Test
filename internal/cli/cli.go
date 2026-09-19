@@ -230,7 +230,10 @@ func classify(r engine.Report, err error) ExitCode {
 	switch {
 	case errors.Is(err, context.Canceled):
 		return ExitInterrupted
-	case errors.Is(err, engine.ErrNoNetwork):
+	case errors.Is(err, engine.ErrNoNetwork), errors.Is(err, engine.ErrICMPBlocked):
+		// Both mean nothing was measured. They are kept apart only so the
+		// message can name the likelier cause, not to grade the outcome
+		// differently.
 		return ExitNoNetwork
 	case err != nil:
 		return ExitPartial
