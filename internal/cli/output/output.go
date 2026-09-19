@@ -50,8 +50,11 @@ func round(v float64) float64 {
 	return math.Round(v*1000) / 1000
 }
 
-func throughputToWire(ok bool, mbps float64, err error, samples []throughput.Sample) wireThroughput {
-	out := wireThroughput{OK: ok, Mbps: round(mbps), Error: errString(err)}
+// throughputToWire carries the connection count alongside the figure. A
+// consumer comparing two runs needs to know whether they were measured the
+// same way, and the rate alone does not say.
+func throughputToWire(ok bool, mbps float64, streams int, err error, samples []throughput.Sample) wireThroughput {
+	out := wireThroughput{OK: ok, Mbps: round(mbps), Streams: streams, Error: errString(err)}
 	for _, s := range samples {
 		out.Samples = append(out.Samples, wireSample{
 			Endpoint: s.Endpoint,

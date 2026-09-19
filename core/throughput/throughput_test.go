@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 )
@@ -98,22 +99,73 @@ func TestMeasureUpload(t *testing.T) {
 	}
 }
 
-func TestMeasureSkipsDirectionTheEndpointDoesNotServe(t *testing.T) {
-	// A download-only endpoint is a normal configuration, not a fault.
+func TestMeasureWhenNoEndpointServesTheDirection(t *testing.T) {
+	// A download-only endpoint is a normal configuration, not a fault. Asking
+	// it for an upload is the same situation as configuring nothing at all, so
+	// it reports that rather than inventing a failed measurement.
 	res := Measure(context.Background(), Options{
 		Direction: DirectionUpload,
 		Endpoints: []Endpoint{{Name: "download only", DownloadURL: "https://example.invalid/down"}},
 		Timeout:   testWindow,
 	})
 
-	if !errors.Is(res.Err, ErrAllEndpointsFailed) {
-		t.Fatalf("Err = %v, want ErrAllEndpointsFailed", res.Err)
+	if !errors.Is(res.Err, ErrNoEndpoints) {
+		t.Fatalf("Err = %v, want it to wrap ErrNoEndpoints", res.Err)
+	}
+	if len(res.Samples) != 0 {
+		t.Errorf("got %d samples, want none — an endpoint meant for the other direction has not failed", len(res.Samples))
+	}
+	// The advice is the part the user needs, so the message must carry it.
+	if !strings.Contains(res.Err.Error(), "--upload-endpoint") {
+		t.Errorf("Err = %q, want it to name --upload-endpoint", res.Err)
+	}
+}
+
+func TestMeasureIgnoresEndpointsForTheOtherDirection(t *testing.T) {
+	srv := downloadServer(t, nil)
+
+	// A list holding both kinds is the ordinary case once download and upload
+	// live on different paths. The download run must simply not see the other.
+	res := Measure(context.Background(), Options{
+		Direction: DirectionDownload,
+		Endpoints: []Endpoint{
+			{Name: "upload only", UploadURL: "https://example.invalid/up"},
+			{Name: "download", DownloadURL: srv.URL},
+		},
+		Timeout: testWindow,
+	})
+
+	if !res.OK {
+		t.Fatalf("OK = false, Err = %v", res.Err)
 	}
 	if len(res.Samples) != 1 {
-		t.Fatalf("got %d samples, want 1", len(res.Samples))
+		t.Fatalf("got %d samples, want 1 — the upload-only endpoint must not appear", len(res.Samples))
 	}
-	if !errors.Is(res.Samples[0].Err, ErrDirectionUnsupported) {
-		t.Errorf("sample error = %v, want ErrDirectionUnsupported", res.Samples[0].Err)
+	if res.Samples[0].Endpoint != "download" {
+		t.Errorf("sample endpoint = %q, want \"download\"", res.Samples[0].Endpoint)
+	}
+}
+
+func TestMeasureReportsTheStreamCountItUsed(t *testing.T) {
+	srv := downloadServer(t, nil)
+
+	res := Measure(context.Background(), Options{
+		Direction: DirectionDownload,
+		Endpoints: []Endpoint{{Name: "local", DownloadURL: srv.URL}},
+		Streams:   2,
+		Timeout:   testWindow,
+	})
+	if res.Streams != 2 {
+		t.Errorf("Streams = %d, want 2 — the figure means a different thing at each count", res.Streams)
+	}
+
+	res = Measure(context.Background(), Options{
+		Direction: DirectionDownload,
+		Endpoints: []Endpoint{{Name: "local", DownloadURL: srv.URL}},
+		Timeout:   testWindow,
+	})
+	if res.Streams != DefaultStreams {
+		t.Errorf("Streams = %d, want the default %d", res.Streams, DefaultStreams)
 	}
 }
 

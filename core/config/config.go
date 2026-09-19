@@ -28,15 +28,20 @@ const (
 	DefaultTimeout  = 10 * time.Second
 	DefaultRetries  = 3
 	DefaultSamples  = 3
-	DefaultStreams  = 1
+	DefaultStreams  = 4
 )
 
 // Config is the resolved configuration for a run.
 type Config struct {
-	Endpoints []string
-	Layer1    string
-	Layer2    string
-	Layer3    string
+	// Endpoints serve both directions. DownloadEndpoints and UploadEndpoints
+	// serve one each, for the common case of a backend that puts the two on
+	// different paths — which is what every real speedtest backend does.
+	Endpoints         []string
+	DownloadEndpoints []string
+	UploadEndpoints   []string
+	Layer1            string
+	Layer2            string
+	Layer3            string
 
 	Interval time.Duration
 	Timeout  time.Duration
@@ -60,10 +65,12 @@ type Config struct {
 // is an explicit contract rather than whatever the internal struct happens to
 // look like, and so durations can be written the way people write them.
 type file struct {
-	Endpoints []string `json:"endpoints,omitempty"`
-	Layer1    string   `json:"layer1,omitempty"`
-	Layer2    string   `json:"layer2,omitempty"`
-	Layer3    string   `json:"layer3,omitempty"`
+	Endpoints         []string `json:"endpoints,omitempty"`
+	DownloadEndpoints []string `json:"download_endpoints,omitempty"`
+	UploadEndpoints   []string `json:"upload_endpoints,omitempty"`
+	Layer1            string   `json:"layer1,omitempty"`
+	Layer2            string   `json:"layer2,omitempty"`
+	Layer3            string   `json:"layer3,omitempty"`
 
 	Interval string `json:"interval,omitempty"`
 	Timeout  string `json:"timeout,omitempty"`
@@ -159,6 +166,12 @@ func Load(path string) (Config, error) {
 func (f file) merge(cfg *Config) error {
 	if len(f.Endpoints) > 0 {
 		cfg.Endpoints = f.Endpoints
+	}
+	if len(f.DownloadEndpoints) > 0 {
+		cfg.DownloadEndpoints = f.DownloadEndpoints
+	}
+	if len(f.UploadEndpoints) > 0 {
+		cfg.UploadEndpoints = f.UploadEndpoints
 	}
 	if f.Layer1 != "" {
 		cfg.Layer1 = f.Layer1

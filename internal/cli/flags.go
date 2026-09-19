@@ -42,10 +42,12 @@ type Flags struct {
 	NoUpload   bool
 	NoLayers   bool
 
-	Endpoints []string
-	Layer1    string
-	Layer2    string
-	Layer3    string
+	Endpoints         []string
+	DownloadEndpoints []string
+	UploadEndpoints   []string
+	Layer1            string
+	Layer2            string
+	Layer3            string
 
 	Servers int
 	Streams int
@@ -87,7 +89,7 @@ func (r *repeatable) Set(v string) error {
 func Parse(args []string) (Flags, error) {
 	var f Flags
 	var watch bool
-	var endpoints repeatable
+	var endpoints, downloadEndpoints, uploadEndpoints repeatable
 
 	fs := flag.NewFlagSet("wifitest", flag.ContinueOnError)
 	// Usage is written by Run, which knows the output stream and the language.
@@ -108,6 +110,8 @@ func Parse(args []string) (Flags, error) {
 	fs.BoolVar(&f.NoLayers, "no-layers", false, "skip the layered diagnostics")
 
 	fs.Var(&endpoints, "endpoint", "throughput endpoint; repeat to supply several")
+	fs.Var(&downloadEndpoints, "download-endpoint", "endpoint for downloads only; repeat to supply several")
+	fs.Var(&uploadEndpoints, "upload-endpoint", "endpoint for uploads only; repeat to supply several")
 	fs.StringVar(&f.Layer1, "layer1", "", "override the local gateway target")
 	fs.StringVar(&f.Layer2, "layer2", "", "override the regional egress target")
 	fs.StringVar(&f.Layer3, "layer3", "", "override the international target")
@@ -138,6 +142,8 @@ func Parse(args []string) (Flags, error) {
 	}
 
 	f.Endpoints = endpoints
+	f.DownloadEndpoints = downloadEndpoints
+	f.UploadEndpoints = uploadEndpoints
 	f.Mode = ModeOnce
 	if watch {
 		f.Mode = ModeWatch

@@ -124,6 +124,12 @@ func merge(cfg config.Config, f Flags) config.Config {
 		// two would average across unlike conditions.
 		cfg.Endpoints = f.Endpoints
 	}
+	if len(f.DownloadEndpoints) > 0 {
+		cfg.DownloadEndpoints = f.DownloadEndpoints
+	}
+	if len(f.UploadEndpoints) > 0 {
+		cfg.UploadEndpoints = f.UploadEndpoints
+	}
 	if f.Layer1 != "" {
 		cfg.Layer1 = f.Layer1
 	}
@@ -184,14 +190,21 @@ func engineOptions(cfg config.Config, f Flags) engine.Options {
 	if f.ICMP {
 		opts.LatencyMethod = latency.MethodICMP
 	}
+	// Three sources, one list. A bare endpoint serves both directions; the
+	// direction-specific ones exist because real speedtest backends put
+	// download and upload on different paths, so one URL cannot name the pair.
 	for _, url := range cfg.Endpoints {
-		// A bare URL configures both directions; an endpoint that refuses
-		// uploads reports that itself when the upload is attempted.
 		opts.Endpoints = append(opts.Endpoints, throughput.Endpoint{
 			Name:        url,
 			DownloadURL: url,
 			UploadURL:   url,
 		})
+	}
+	for _, url := range cfg.DownloadEndpoints {
+		opts.Endpoints = append(opts.Endpoints, throughput.Endpoint{Name: url, DownloadURL: url})
+	}
+	for _, url := range cfg.UploadEndpoints {
+		opts.Endpoints = append(opts.Endpoints, throughput.Endpoint{Name: url, UploadURL: url})
 	}
 	return opts
 }
@@ -289,7 +302,9 @@ Scope:
   --no-layers             skip the layered diagnostics
 
 Targets:
-  --endpoint <url>        throughput endpoint; repeat to supply several
+  --endpoint <url>        endpoint serving both directions; repeat for several
+  --download-endpoint <url>  download-only endpoint; repeat for several
+  --upload-endpoint <url>    upload-only endpoint; repeat for several
                           (replaces the built-in list rather than adding to it)
   --layer1 <host>         local gateway target
   --layer2 <host>         regional egress target
@@ -297,7 +312,7 @@ Targets:
 
 Measurement:
   --servers <n>           endpoints contributing to the mean
-  --streams <n>           parallel connections per endpoint (default 1)
+  --streams <n>           parallel connections per endpoint, 1-16 (default 4)
   --timeout <duration>    per-measurement timeout
   --retries <n>           retry attempts per measurement
   --icmp                  probe with ICMP rather than TCP (may need elevation)

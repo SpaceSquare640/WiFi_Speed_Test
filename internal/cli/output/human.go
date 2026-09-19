@@ -89,8 +89,8 @@ func (h *Human) writeHeader(b *strings.Builder, r engine.Report) {
 }
 
 func (h *Human) writeSummary(b *strings.Builder, r engine.Report) {
-	h.writeField(b, h.tr.t("download"), h.rate(r.Download.OK, r.Download.Mbps, ansiGreen))
-	h.writeField(b, h.tr.t("upload"), h.rate(r.Upload.OK, r.Upload.Mbps, ansiBlue))
+	h.writeField(b, h.tr.t("download"), h.rate(r.Download.OK, r.Download.Mbps, r.Download.Streams, ansiGreen))
+	h.writeField(b, h.tr.t("upload"), h.rate(r.Upload.OK, r.Upload.Mbps, r.Upload.Streams, ansiBlue))
 	if r.Latency.OK {
 		h.writeField(b, h.tr.t("latency"), h.paint(fmt.Sprintf("%.1f ms", r.Latency.LatencyMS), ansiAmber))
 	}
@@ -107,11 +107,22 @@ func (h *Human) writeField(b *strings.Builder, label, value string) {
 // rate renders a throughput figure, or says plainly that it was never measured.
 // Printing 0.0 Mbps for an absent measurement would claim a result the run does
 // not have.
-func (h *Human) rate(ok bool, mbps float64, colour string) string {
+func (h *Human) rate(ok bool, mbps float64, streams int, colour string) string {
 	if !ok {
 		return h.paint(h.tr.t("notMeasured"), ansiDim)
 	}
-	return h.paint(fmt.Sprintf("%.2f Mbps", mbps), colour)
+	figure := h.paint(fmt.Sprintf("%.2f Mbps", mbps), colour)
+	if streams < 1 {
+		return figure
+	}
+	// The connection count travels with the figure because the figure means a
+	// different thing at one connection than at four, and a reader who is not
+	// told will assume whichever suits them.
+	word := h.tr.t("streams")
+	if streams == 1 {
+		word = h.tr.t("stream")
+	}
+	return figure + " " + h.paint(fmt.Sprintf("(%d %s)", streams, word), ansiDim)
 }
 
 func (h *Human) gradeText(g grade.Grade) string {

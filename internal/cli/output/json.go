@@ -84,6 +84,7 @@ type wireLayer struct {
 type wireThroughput struct {
 	OK      bool         `json:"ok"`
 	Mbps    float64      `json:"mbps"`
+	Streams int          `json:"streams,omitempty"`
 	Samples []wireSample `json:"samples,omitempty"`
 	Error   string       `json:"error,omitempty"`
 }
@@ -158,8 +159,8 @@ func toWire(r engine.Report, t history.Trend) wireReport {
 		})
 	}
 
-	out.Download = throughputToWire(r.Download.OK, r.Download.Mbps, r.Download.Err, r.Download.Samples)
-	out.Upload = throughputToWire(r.Upload.OK, r.Upload.Mbps, r.Upload.Err, r.Upload.Samples)
+	out.Download = throughputToWire(r.Download.OK, r.Download.Mbps, r.Download.Streams, r.Download.Err, r.Download.Samples)
+	out.Upload = throughputToWire(r.Upload.OK, r.Upload.Mbps, r.Upload.Streams, r.Upload.Err, r.Upload.Samples)
 
 	out.Latency = wireLatency{
 		Target:    r.Latency.Target,

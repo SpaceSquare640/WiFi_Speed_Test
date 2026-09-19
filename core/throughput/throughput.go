@@ -9,6 +9,7 @@ package throughput
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -66,6 +67,12 @@ type Result struct {
 	Direction Direction
 	OK        bool
 
+	// Streams is how many connections carried the measurement. It travels with
+	// the figure because the figure means a different thing at one connection
+	// than at four, and a number whose method is not stated invites the reader
+	// to assume the wrong one.
+	Streams int
+
 	// Mbps is the mean across successful samples.
 	Mbps float64
 
@@ -76,12 +83,21 @@ type Result struct {
 // ErrNoEndpoints reports that there was nothing to measure against. The builtin
 // list ships empty until each candidate has been cleared, so this is the normal
 // state of a fresh install rather than a fault.
-var ErrNoEndpoints = errors.New("throughput: no endpoint configured (supply one with --endpoint)")
+var ErrNoEndpoints = errors.New("throughput: no endpoint configured")
 
-// ErrDirectionUnsupported reports that an endpoint carries no URL for the
-// direction being measured, which is a configuration fact rather than a
-// failure: an endpoint may serve downloads and refuse uploads.
-var ErrDirectionUnsupported = errors.New("throughput: endpoint has no URL for this direction")
+// noEndpointFor reports that endpoints were supplied but none of them serves
+// this direction — a download-only list asked for an upload, say.
+//
+// It wraps ErrNoEndpoints because the situation is the same one: there is
+// nothing to measure against and no retry will change that. Only the advice
+// differs, and the advice is the part the user needs.
+func noEndpointFor(d Direction) error {
+	flag := "--download-endpoint"
+	if d == DirectionUpload {
+		flag = "--upload-endpoint"
+	}
+	return fmt.Errorf("%w for %s; supply one with %s", ErrNoEndpoints, d, flag)
+}
 
 // ErrAllEndpointsFailed reports that every endpoint was tried and none of them
 // yielded a measurement. The per-endpoint reasons are in Result.Samples; this
@@ -93,14 +109,20 @@ const (
 	DefaultSamples = 3
 	DefaultTimeout = 10 * time.Second
 
-	// DefaultStreams is one connection.
+	// DefaultStreams is four connections.
 	//
-	// A single stream is what the figure claims to be — the rate one TCP
-	// connection achieved — and needs no caveat to explain. It does understate
-	// a long, high-latency path, where one connection's window bounds it below
-	// what the link can carry; --streams raises it for anyone measuring such a
-	// path, and the result then describes several connections rather than one.
-	DefaultStreams = 1
+	// One would be the more transparent figure and was the original default,
+	// until a measurement against a real endpoint showed what it costs: upload
+	// over four connections came out 3.6 times higher than over one, and rose
+	// almost linearly, which is the signature of a single connection's
+	// congestion window rather than of the link. A default that reports a
+	// healthy upload as a twentieth of its capacity would send users hunting a
+	// fault that is not there, and for a tool whose job is to say what is
+	// wrong, inventing a fault is the worst error available.
+	//
+	// The figure therefore describes four connections, and every renderer says
+	// so beside it. --streams 1 restores the stricter reading.
+	DefaultStreams = 4
 )
 
 // Measure runs the configured direction and returns the aggregate.
@@ -112,7 +134,7 @@ const (
 func Measure(ctx context.Context, o Options) Result {
 	res := Result{Direction: o.Direction}
 	if len(o.Endpoints) == 0 {
-		res.Err = ErrNoEndpoints
+		res.Err = fmt.Errorf("%w; supply one with --endpoint", ErrNoEndpoints)
 		return res
 	}
 	if o.Samples <= 0 {
@@ -125,25 +147,35 @@ func Measure(ctx context.Context, o Options) Result {
 		o.Timeout = DefaultTimeout
 	}
 
+	res.Streams = o.Streams
+
+	// An endpoint that serves only the other direction is not a failure worth
+	// reporting: a download-only endpoint in the list is a deliberate
+	// configuration, and a sample saying so for every one of them would bury
+	// the failures that do matter.
+	serving := make([]Endpoint, 0, len(o.Endpoints))
+	for _, endpoint := range o.Endpoints {
+		if directionURL(endpoint, o.Direction) != "" {
+			serving = append(serving, endpoint)
+		}
+	}
+	if len(serving) == 0 {
+		res.Err = noEndpointFor(o.Direction)
+		return res
+	}
+
 	var sum float64
 	var measured int
 
-	for _, endpoint := range o.Endpoints {
+	for _, endpoint := range serving {
 		if measured >= o.Samples || ctx.Err() != nil {
 			break
 		}
 
-		url := endpoint.DownloadURL
-		if o.Direction == DirectionUpload {
-			url = endpoint.UploadURL
-		}
+		url := directionURL(endpoint, o.Direction)
 		name := endpoint.Name
 		if name == "" {
 			name = url
-		}
-		if url == "" {
-			res.Samples = append(res.Samples, Sample{Endpoint: name, Err: ErrDirectionUnsupported})
-			continue
 		}
 
 		transferred, err := run(ctx, o.Direction, url, o.Streams, o.Timeout)
@@ -167,6 +199,15 @@ func Measure(ctx context.Context, o Options) Result {
 	res.OK = true
 	res.Mbps = sum / float64(measured)
 	return res
+}
+
+// directionURL returns the endpoint's URL for one direction, or empty when it
+// does not serve that direction at all.
+func directionURL(e Endpoint, d Direction) string {
+	if d == DirectionUpload {
+		return e.UploadURL
+	}
+	return e.DownloadURL
 }
 
 // rate converts a transfer to megabits per second.
